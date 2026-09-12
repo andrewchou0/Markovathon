@@ -425,6 +425,30 @@ def _fallback_report(facts: dict) -> str:
     )
 
 
+def _ensure_email_header(text: str, facts: dict) -> str:
+    """Guarantee the two header lines an email needs.
+
+    A model asked for an email will sometimes return bare prose, or a body with
+    no Subject. Person 3 renders this field verbatim as an email, so a missing
+    header reads as a broken feature on screen. Found by end-to-end testing:
+    the model path was returning a To: line and no Subject at all.
+    """
+    lines = text.splitlines() or [""]
+
+    if not lines[0].strip().lower().startswith("to:"):
+        lines.insert(0, "To: Compliance Contact")
+
+    if not any(line.strip().lower().startswith("subject:") for line in lines[:4]):
+        subject = f"Subject: Supply disruption — {_headline(facts['event_description'])} — action required"
+        lines.insert(1, subject)
+
+    # A blank line between headers and body, so it renders as an email.
+    if len(lines) > 2 and lines[2].strip():
+        lines.insert(2, "")
+
+    return "\n".join(lines)
+
+
 def _finish(text: str, mode: str) -> str:
     STATS["last_mode"] = mode
     if mode == "deterministic":
@@ -464,9 +488,7 @@ def generate_draft_report(event, directly_affected, cascading_affected, supplier
     )
     try:
         text = _quality_gate(_clean(_call_ollama(prompt, num_predict=520)), facts["names"])
-        if "to:" not in text[:80].lower():
-            text = "To: Compliance Contact\n" + text
-        return _finish(text, "llm")
+        return _finish(_ensure_email_header(text, facts), "llm")
     except BaseException:  # noqa: BLE001
         return _finish(_fallback_report(facts), "deterministic")
 
@@ -592,6 +614,21 @@ if __name__ == "__main__":
     check("fallback report flags itself as a draft", "has not been sent" in report)
     check("fallback is deterministic", generate_risk_summary(event, direct, cascade, suppliers) == summary)
     check("mode is reported as deterministic", STATS["last_mode"] == "deterministic")
+
+    # --- the email header guarantee -----------------------------------------
+    _f = _facts(event, direct, cascade, suppliers)
+    bare = _ensure_email_header("Gulf Precision Castings is down.", _f)
+    check("header: To: line added to bare prose", bare.splitlines()[0].startswith("To: "))
+    check("header: Subject line added to bare prose", bare.splitlines()[1].startswith("Subject: "))
+    check("header: blank line separates headers from body", bare.splitlines()[2] == "")
+    check("header: body survives intact", "Gulf Precision Castings is down." in bare)
+    already = _ensure_email_header("To: Someone\nSubject: Existing\n\nBody.", _f)
+    check("header: existing headers are not duplicated", already.count("To:") == 1 and already.count("Subject:") == 1)
+    check("header: existing subject is preserved", "Subject: Existing" in already)
+    partial = _ensure_email_header("To: Someone\n\nBody text.", _f)
+    check("header: missing subject is filled in alongside an existing To:", partial.count("To:") == 1 and "Subject: Supply disruption" in partial)
+    check("header: subject avoids nested dashes", partial.splitlines()[1].count("—") == 2, partial.splitlines()[1])
+    check("header: survives empty input", _ensure_email_header("", _f).splitlines()[0].startswith("To: "))
 
     # --- degenerate inputs must still produce prose -------------------------
     hard_cases = [

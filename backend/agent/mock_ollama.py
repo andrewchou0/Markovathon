@@ -19,6 +19,8 @@ Scenarios (--scenario):
     good     canned prose wrapped in the junk real models emit (fences,
              preamble, think block) — proves the sanitizer earns its place
     messy    same, plus stacked preambles and ragged whitespace
+    no_headers  asked for an email, returns bare prose -> narrate.py must add
+             the To:/Subject: lines itself
     empty    a 200 with an empty response field -> narrate.py must fall back
     garbage  fluent prose naming no real supplier -> quality gate must reject
     slow     delays past a short read timeout -> narrate.py must fall back
@@ -43,19 +45,56 @@ _GOOD = (
     "on compliance."
 )
 
+_GOOD_EMAIL = (
+    "To: Compliance Contact\n"
+    "Subject: Gulf Coast port closure — immediate exposure review\n\n"
+    "A high-severity port closure on the Gulf Coast has stopped inbound alloy "
+    "shipments to Gulf Precision Castings, the single qualified source for our cast "
+    "turbine housing.\n\n"
+    "Affected: Gulf Precision Castings, Delta Assembly Works, Northline Coatings, "
+    "Cascade Final Assembly.\n\n"
+    "Recommended next steps:\n"
+    "1. Confirm on-hand housing inventory at Delta Assembly Works.\n"
+    "2. Open qualification review for a second casting source.\n"
+    "3. Re-check the compliance filing for Delta Assembly Works.\n\n"
+    "This draft is for human review and has not been sent."
+)
+
+# A model that returns bare prose when asked for an email — the case that broke
+# end-to-end testing and is now handled by narrate._ensure_email_header.
+_NO_HEADERS = (
+    "Gulf Precision Castings has been cut off by the Gulf Coast port closure and "
+    "Delta Assembly Works is exposed downstream. Someone should look at inventory "
+    "and start qualifying a second source this week."
+)
+
 _GARBAGE = (
     "The situation is developing and several parties may be impacted in the coming "
     "days. Stakeholders should monitor the position closely and escalate as needed, "
     "pending further assessment of the operational picture."
 )
 
+def _is_email_prompt(prompt: str) -> bool:
+    """narrate.py sends two different prompts; a real model answers them
+    differently, so the mock has to as well."""
+    return "email" in prompt.lower()
+
+
 SCENARIOS = {
-    "good": lambda: f"<think>Considering the cascade.</think>```\nSure! Here is the summary: {_GOOD}\n```",
-    "messy": lambda: f"Certainly.\n\nHere's the draft:\n\n```markdown\nSummary:   {_GOOD}\n\n\n\n```",
-    "empty": lambda: "",
-    "garbage": lambda: _GARBAGE,
-    "slow": lambda: (time.sleep(5), _GOOD)[1],
-    "error": lambda: None,
+    # Canned prose wrapped in the junk real models emit, answering whichever of
+    # the two prompts it was actually given.
+    "good": lambda p: (
+        f"<think>Drafting.</think>```\nSure! Here is the draft:\n{_GOOD_EMAIL}\n```"
+        if _is_email_prompt(p)
+        else f"<think>Considering the cascade.</think>```\nSure! Here is the summary: {_GOOD}\n```"
+    ),
+    "messy": lambda p: f"Certainly.\n\nHere's the draft:\n\n```markdown\nSummary:   {_GOOD_EMAIL if _is_email_prompt(p) else _GOOD}\n\n\n\n```",
+    # Asked for an email, returns bare prose with no To:/Subject: lines.
+    "no_headers": lambda p: _NO_HEADERS,
+    "empty": lambda p: "",
+    "garbage": lambda p: _GARBAGE,
+    "slow": lambda p: (time.sleep(5), _GOOD)[1],
+    "error": lambda p: None,
 }
 
 
@@ -78,11 +117,15 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802 - stdlib naming
         length = int(self.headers.get("Content-Length") or 0)
-        self.rfile.read(length)
+        raw = self.rfile.read(length)
         if not self.path.startswith("/api/generate"):
             self._send(404, {"error": "not found"})
             return
-        text = SCENARIOS[self.scenario]()
+        try:
+            prompt = json.loads(raw or b"{}").get("prompt", "")
+        except ValueError:
+            prompt = ""
+        text = SCENARIOS[self.scenario](prompt)
         if text is None:
             self._send(500, {"error": "simulated model failure"})
             return

@@ -9,13 +9,26 @@ Two modules, one rule: **`propagation.py` decides, `narrate.py` describes.**
 | `mock_ollama.py` | test fixture: a fake model on localhost | stdlib only |
 | `__main__.py` | `python -m backend.agent` — full self-test | the above |
 
-## Status: done and green
+## Status: done, green, and integrated with Person 2
 
 ```bash
-python -m backend.agent          # 83 checks: both suites + the API handoff
+python -m backend.agent          # 92 checks: both suites + the API handoff
 ```
 
 Runs with **no API, no frontend, no MongoDB and no Ollama**. Needs nothing started.
+
+Verified end-to-end against Person 2's layer as well — real MongoDB (7.x in Docker),
+their seeder, their repository, their FastAPI app, over HTTP: **77/77 integration
+checks**, all 5 seeded events, every `AnalysisResult` validated against
+`contracts/analysis_result.schema.json`. Notable results:
+
+- no Mongo `_id` reaches any response
+- unknown `event_id` -> 404, malformed body -> 422
+- re-seeding does not duplicate documents
+- the same event returns byte-identical ids *and* prose on re-run
+- CORS allows Vite's origin
+- **with the model completely down, `POST /api/analyze` still returns HTTP 200 with
+  full prose in 0.57s** — no hang, no 500, nothing logged as an error
 
 ## Wiring it up — for Person 2
 
@@ -110,6 +123,11 @@ The LLM is the only component that can fail, so it is the only one with a safety
    propagation identified, is treated as a failure. Cheap hallucination guard: we
    already know who is affected, so prose mentioning none of them is describing
    something that didn't happen.
+4b. **Email headers are guaranteed, not hoped for** — a model asked for an email will
+   sometimes return bare prose. `draft_report` always starts with a `To:` line and
+   carries a `Subject:`, with a blank line before the body, because Person 3 renders
+   the field verbatim. (Found by end-to-end testing: the model path was returning a
+   `To:` line and no `Subject:` at all.)
 5. **Deterministic narrator** — on any failure, templates built from the same
    structured facts produce the summary and the email. Written to be presentable on
    screen, because that is exactly when they appear.
@@ -126,17 +144,34 @@ python backend/agent/mock_ollama.py --port 11434              # behaves like a h
 OLLAMA_HOST=http://localhost:11434 python -m backend.agent    # now runs in llm mode
 ```
 
-`--scenario` covers the failure modes deliberately: `good`, `messy`, `empty`,
-`garbage`, `slow`, `error`. Handy for Person 3 — you can see real llm-mode text in the
-result panel with no GPU and no 20GB download.
+`--scenario` covers the failure modes deliberately: `good`, `messy`, `no_headers`,
+`empty`, `garbage`, `slow`, `error`. It is prompt-aware, so it answers the summary
+prompt and the email prompt differently, the way a real model does. Handy for
+Person 3 — you can see real llm-mode text in the result panel with no GPU and no 20GB
+download.
+
+### Reproducing the full-stack test
+
+No local MongoDB needed, if you have Docker:
+
+```bash
+docker run -d --name markovathon-mongo -p 27017:27017 mongo:7
+python -m backend.data.seed
+python backend/agent/mock_ollama.py --port 11434 &      # stand-in for the model
+env -u OLLAMA_HOST python -m uvicorn backend.api.main:app --port 8000
+```
+
+Note: `requirements.txt` pins `pydantic==2.9.2`, which has **no wheel for Python
+3.14** and fails to build. Use Python 3.11 as the stack specifies (`python3.11 -m venv
+.venv`). Worth knowing before someone loses twenty minutes to it.
 
 ## What I have NOT verified
 
 The live path is proven against `mock_ollama.py` over real HTTP (transport, retry,
-parsing, sanitizing, gate, fallback — 36 checks), but **no real `qwen3.6:35b` call has
-been made**: Ollama isn't installed on this machine. What's untested is therefore
-model-specific only — actual latency, and whether the real model's phrasing clears the
-quality gate. First person with Ollama running should do:
+parsing, sanitizing, gate, header injection, fallback — 43 checks), but **no real
+`qwen3.6:35b` call has been made**: Ollama isn't installed on this machine. What's
+untested is therefore model-specific only — actual latency, and whether the real
+model's phrasing clears the quality gate. First person with Ollama running should do:
 
 ```bash
 env -u OLLAMA_HOST python backend/agent/narrate.py
