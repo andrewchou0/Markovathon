@@ -31,7 +31,10 @@ Build:
 
 5. Offline badge: a small fixed-position badge, e.g. top-right, showing
    "External calls blocked: N". Person 4 owns GET /api/offline-status — build the
-   UI element now with a hardcoded 0 and poll that endpoint once it exists.
+   UI element now with a hardcoded 0 and poll that endpoint once it exists. That
+   response also reports which local hosts the model and the database are on, so
+   leave room to render those two lines: "everything on localhost" is the claim the
+   badge exists to make, and showing the DB host is what makes it credible.
 
 A visible loading state on the result panel matters: the LLM call (qwen3.6:35b,
 running locally) takes a moment, and dead air during a demo reads as a crash.

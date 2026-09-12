@@ -25,8 +25,19 @@ work, sensitive supplier relationships).
     early, not at the last minute.
   - Only ever called via `http://localhost:11434/api/generate` — never any other host,
     ever, from any file.
-- **Data:** plain JSON files in `/backend/data/fixtures/` — no database. This is a
-  hackathon; SQLite is overkill, a DB server is worse.
+- **Data:** **MongoDB**, running locally on `localhost:27017`, database
+  `markovathon`, collections `suppliers` and `events`. Driver: `pymongo` (sync).
+  - The JSON files in `/backend/data/seed/` are **seed data**, not the runtime store —
+    `python -m backend.data.seed` loads them into Mongo and is idempotent, so it doubles
+    as the reset button between demo takes.
+  - **Local `mongod` only. Never Atlas, never a `mongodb+srv://` URI, never any host
+    but `localhost`/`127.0.0.1`** — hosted data would break the entire on-premises
+    premise of the project, and `pymongo` uses raw sockets so it slips past our
+    `requests`/`httpx` offline hook. See `contracts/storage.md`.
+  - Mongo injects an `_id` that is not in our schemas and is not JSON-serializable.
+    Set `_id` to the document's own id string on write, and project `{"_id": 0}` on
+    every read. Full rule in `contracts/storage.md` — this is the one way Mongo can
+    break the data contracts below.
 - **Frontend:** React (Vite), plain CSS or Tailwind — no heavy UI library, keep it
   lightweight and fast to iterate on.
 - **Inter-service comms:** REST over HTTP, JSON bodies. No websockets (poll or single
@@ -48,7 +59,8 @@ text generation either — that's the part that needs to look intelligent in the
 
 Source of truth lives in `/contracts/` (JSON Schemas + copy-pasteable examples).
 
-`supplier` (a list of these, in `/backend/data/fixtures/suppliers.json`):
+`supplier` (one document in the `suppliers` collection; seeded from
+`/backend/data/seed/suppliers.json`):
 
 ```json
 {
@@ -66,7 +78,8 @@ Source of truth lives in `/contracts/` (JSON Schemas + copy-pasteable examples).
 `downstream_dependents` = suppliers/parts that depend on this one. This is what makes
 cascading effects work.
 
-`event` (a list of these, in `/backend/data/fixtures/events.json`):
+`event` (one document in the `events` collection; seeded from
+`/backend/data/seed/events.json`):
 
 ```json
 {
@@ -116,10 +129,10 @@ draft" without recomputing propagation.
 | --- | --- |
 | `/contracts/` | shared, source of truth — changes get flagged to everyone |
 | `/backend/agent/` | **Person 1** (`propagation.py`, `narrate.py`) |
-| `/backend/data/` | **Person 2** (fixtures + loader functions) |
+| `/backend/data/` | **Person 2** (seed JSON, `db.py`, `seed.py`, `repository.py`) |
 | `/backend/api/` | **Person 2** (FastAPI routes, calls into `agent/`) |
 | `/frontend/` | **Person 3** |
-| `/demo/` | **Person 4** (script, demo fixtures, offline-mode indicator, `run.sh`) |
+| `/demo/` | **Person 4** (script, offline-mode indicator, local-URI assertion, `run.sh`) |
 
 ## OFFLINE-MODE INDICATOR (Person 4 builds this, everyone else supports it)
 
@@ -129,10 +142,20 @@ targets a host other than `localhost`/`127.0.0.1`. Expose a running count of
 "external calls blocked: 0" that the frontend displays as a badge. This is the literal,
 demonstrable proof of "fully offline" — not just a claim.
 
+Two things the HTTP hook must get right now that Mongo is in the stack:
+
+- The allowlist has to cover **`localhost:11434`** (Ollama) and **`localhost:27017`**
+  (MongoDB). An over-strict patch takes down the agent and the database together.
+- `pymongo` talks raw TCP, so it does **not** pass through the patch. The hook alone
+  cannot prove the database is local. Person 4 also asserts at startup that `MONGO_URI`
+  points at `localhost`/`127.0.0.1` and raises if it doesn't — without that, the badge
+  could read "blocked: 0" while every supplier record streams to a cloud cluster.
+
 ## GENERAL RULES FOR CLAUDE CODE
 
-- Never call out to any external network host, in any file, for any reason — mock data
-  and local Ollama only.
+- Never call out to any external network host, in any file, for any reason — local
+  Mongo and local Ollama only. That includes connection strings: a `mongodb+srv://`
+  URI is an external call wearing a different hat.
 - Never change the JSON contracts above without flagging it loudly — three other
   people's code depends on these shapes staying stable.
 - Keep functions small and testable independently — each person needs to be able to run

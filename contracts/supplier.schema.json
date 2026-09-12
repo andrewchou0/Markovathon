@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Supplier",
-  "description": "One supplier in the network. Files in /backend/data/fixtures/suppliers.json are an array of these.",
+  "description": "One supplier \u2014 a document in the `suppliers` collection of the local MongoDB database `markovathon`. Seeded from /backend/data/seed/suppliers.json. Mongo's `_id` is deliberately not permitted here: see contracts/storage.md.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -15,26 +15,49 @@
     "downstream_dependents"
   ],
   "properties": {
-    "id": { "type": "string", "pattern": "^sup_[0-9]{3}$", "examples": ["sup_001"] },
-    "name": { "type": "string" },
-    "part_supplied": { "type": "string" },
+    "id": {
+      "type": "string",
+      "pattern": "^sup_[0-9]{3}$",
+      "examples": [
+        "sup_001"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "part_supplied": {
+      "type": "string"
+    },
     "single_source": {
       "type": "boolean",
-      "description": "True if no alternate supplier exists for this part — raises severity."
+      "description": "True if no alternate supplier exists for this part \u2014 raises severity."
     },
     "compliance_status": {
-      "enum": ["compliant", "at_risk", "non_compliant"],
+      "enum": [
+        "compliant",
+        "at_risk",
+        "non_compliant"
+      ],
       "description": "Drives the status dot color on the frontend supplier board."
     },
     "location": {
       "type": "string",
       "description": "Matched against event.affected_location by substring/exact match. No geocoding.",
-      "examples": ["Gulf Coast, LA"]
+      "examples": [
+        "Gulf Coast, LA"
+      ]
     },
-    "financial_risk_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "financial_risk_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
     "downstream_dependents": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^sup_[0-9]{3}$" },
+      "items": {
+        "type": "string",
+        "pattern": "^sup_[0-9]{3}$"
+      },
       "description": "Supplier ids that depend on this one. This is what makes cascading effects work."
     }
   }

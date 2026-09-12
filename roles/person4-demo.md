@@ -17,14 +17,37 @@ backend/api/main.py) — clear those with Person 2 before you touch the file.
    at 0 in a working demo) and expose it via GET /api/offline-status returning
    {"external_calls_blocked": 0, "mode": "fully offline"}.
 
-   Make sure the allowlist covers localhost:11434 — every Ollama call goes through
-   the same patched library, so an over-strict patch takes down the whole agent.
-   Test that the agent still narrates with the hook installed.
+   Make sure the allowlist covers localhost:11434 (Ollama) AND localhost:27017
+   (MongoDB). An over-strict patch takes down the agent and the database in one go.
+   Test that the agent still narrates and the board still loads with the hook
+   installed.
 
-3. Write /demo/run.sh — a single script that starts Ollama (if not running, and
-   verifies qwen3.6:35b is pulled: `ollama list | grep qwen3.6`), starts the
-   FastAPI backend, and starts the frontend dev server, so the whole thing comes up
-   with one command.
+2b. The HTTP hook is not sufficient proof any more — close the Mongo gap.
+   pymongo talks raw TCP sockets, so a database connection never passes through a
+   requests/httpx patch. A teammate who "fixes" a connection issue by pasting an
+   Atlas mongodb+srv:// URI would ship every supplier record to a cloud cluster
+   while your badge still proudly reads "external calls blocked: 0".
+
+   So at startup, also assert that MONGO_URI (from backend/data/db.py) parses to a
+   host of localhost or 127.0.0.1, and raise immediately with a blunt message if it
+   doesn't. Include the database host in the offline-status response so the claim is
+   visible rather than assumed, e.g.
+   {"external_calls_blocked": 0, "mode": "fully offline",
+    "llm": "localhost:11434", "db": "localhost:27017"}.
+   Tell Person 3 the final shape so the badge can show it.
+
+3. Write /demo/run.sh — a single script that brings the whole stack up:
+     - starts mongod if it isn't running (and creates/points at a --dbpath),
+     - runs `python -m backend.data.seed` to load the fixtures (idempotent, so this
+       is safe every launch and resets state between takes),
+     - starts Ollama if not running, and verifies the model is pulled:
+       `ollama list | grep qwen3.6`,
+     - starts the FastAPI backend,
+     - starts the frontend dev server.
+   Fail fast with a readable message if any step doesn't come up — a script that
+   half-starts is worse than one that stops and says why. Mongo is the newest
+   moving part in the stack, so write and test this step early rather than at
+   hour six.
 
 4. Starting a couple hours before demo time: run the full flow end-to-end
    repeatedly, record screen captures of it working as a fallback in case the live

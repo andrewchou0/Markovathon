@@ -1,20 +1,56 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Event",
-  "description": "A disruption event. /backend/data/fixtures/events.json is an array of these.",
+  "description": "A disruption event \u2014 a document in the `events` collection of the local MongoDB database `markovathon`. Seeded from /backend/data/seed/events.json. Mongo's `_id` is deliberately not permitted here: see contracts/storage.md.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "type", "description", "affected_location", "severity", "timestamp"],
+  "required": [
+    "id",
+    "type",
+    "description",
+    "affected_location",
+    "severity",
+    "timestamp"
+  ],
   "properties": {
-    "id": { "type": "string", "pattern": "^evt_[0-9]{3}$", "examples": ["evt_001"] },
-    "type": { "enum": ["weather", "financial", "compliance", "geopolitical"] },
-    "description": { "type": "string", "examples": ["Port closure, Gulf Coast, 48hrs"] },
+    "id": {
+      "type": "string",
+      "pattern": "^evt_[0-9]{3}$",
+      "examples": [
+        "evt_001"
+      ]
+    },
+    "type": {
+      "enum": [
+        "weather",
+        "financial",
+        "compliance",
+        "geopolitical"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "examples": [
+        "Port closure, Gulf Coast, 48hrs"
+      ]
+    },
     "affected_location": {
       "type": "string",
       "description": "Matched against supplier.location by simple substring/exact match. Keep it simple.",
-      "examples": ["Gulf Coast, LA"]
+      "examples": [
+        "Gulf Coast, LA"
+      ]
     },
-    "severity": { "enum": ["low", "medium", "high"] },
-    "timestamp": { "type": "string", "format": "date-time" }
+    "severity": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
   }
 }

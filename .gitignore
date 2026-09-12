@@ -16,6 +16,11 @@ dist/
 .env.*
 !.env.example
 
+# MongoDB local data dir (if running mongod --dbpath here)
+.mongo-data/
+mongo-data/
+*.mongodb.lock
+
 # OS / editors
 .DS_Store
 .idea/

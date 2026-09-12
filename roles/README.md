@@ -8,7 +8,7 @@ Open your own file below and paste its contents as your first message to Claude 
 | File | Owns |
 | --- | --- |
 | `person1-agent.md` | `/backend/agent/` — propagation + narration |
-| `person2-data-api.md` | `/backend/data/` and `/backend/api/` — fixtures, loader, FastAPI |
+| `person2-data-api.md` | `/backend/data/` and `/backend/api/` — seed JSON, MongoDB layer, FastAPI |
 | `person3-frontend.md` | `/frontend/` — React board, event trigger, staggered reveal |
 | `person4-demo.md` | `/demo/` — scenario, offline proof, `run.sh`, integration |
 
@@ -18,7 +18,8 @@ Only touch your own folder plus read `/contracts/`.
 
 1. **Person 4** locks the demo scenario (which event, which suppliers) and hands the
    exact ids to Person 2.
-2. **Person 2** writes the fixtures first, before the API.
+2. **Person 2** writes the seed JSON first — before MongoDB, before the API — then
+   gets `mongod` up and seeded early, since it's the newest moving part in the stack.
 3. **Person 1** writes `propagation.py` first — zero dependencies, and Person 2 needs it
    working to finish the API layer.
 4. **Person 3** never waits: build the entire UI against

@@ -3,6 +3,14 @@ YOUR ROLE: Build /backend/agent/
 Read CLAUDE.md (shared context) and /contracts/ first. Do not touch any folder
 other than /backend/agent/.
 
+Your functions take plain dicts and know nothing about storage. Suppliers and
+events now live in MongoDB, but Person 2's repository layer strips Mongo's `_id`
+before anything reaches you, so what you receive is exactly the shape in
+contracts/supplier.schema.json and contracts/event.schema.json. Do not import
+pymongo, do not query a collection, do not accept an _id field — if you ever see
+one in your input, that's a bug in the repository layer, not something for you to
+handle.
+
 Files to create:
 
 - propagation.py:
