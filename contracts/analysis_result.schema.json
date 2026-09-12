@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AnalysisResult",
+  "description": "Returned by POST /api/analyze. The two id lists are computed in deterministic Python; the two text fields are the only LLM-generated values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event", "directly_affected", "cascading_affected", "risk_summary", "draft_report"],
+  "properties": {
+    "event": { "$ref": "./event.schema.json" },
+    "directly_affected": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^sup_[0-9]{3}$" },
+      "description": "Suppliers whose location matched event.affected_location."
+    },
+    "cascading_affected": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^sup_[0-9]{3}$" },
+      "description": "Reached via downstream_dependents of the directly affected. Never includes an id already in directly_affected."
+    },
+    "risk_summary": { "type": "string", "description": "LLM-generated, 2-3 sentences." },
+    "draft_report": { "type": "string", "description": "LLM-generated, formatted as an email." }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event": {
+    "id": "evt_001",
+    "type": "weather",
+    "description": "Port closure, Gulf Coast, 48hrs — inbound alloy shipments held",
+    "affected_location": "Gulf Coast, LA",
+    "severity": "high",
+    "timestamp": "2026-09-12T14:05:00Z"
+  },
+  "directly_affected": ["sup_001"],
+  "cascading_affected": ["sup_002", "sup_003"],
+  "risk_summary": "A 48-hour port closure on the Gulf Coast has halted inbound alloy shipments to Gulf Precision Castings, our single-source supplier for cast turbine housings. Because no alternate source is qualified for this part, the stoppage propagates to Delta Assembly Works and Northline Coatings, both of which draw directly on that housing. Delta Assembly is already flagged at_risk on compliance with an elevated financial risk score, making it the most fragile point in the chain.",
+  "draft_report": "To: Compliance Contact\nSubject: Supply disruption — Gulf Coast port closure (evt_001), action required\n\nWe have identified a high-severity disruption affecting one directly impacted supplier and two downstream dependents.\n\nDirectly affected: Gulf Precision Castings (sup_001) — single-source, cast turbine housing.\nCascading exposure: Delta Assembly Works (sup_002), Northline Coatings (sup_003).\n\nRecommended next steps: confirm on-hand housing inventory at Delta Assembly, begin qualification review for an alternate casting source, and document the compliance status of sup_002 before the next filing window.\n\nThis draft is prepared for human review and has not been sent."
+}
