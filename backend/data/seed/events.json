@@ -1,0 +1,42 @@
+[
+  {
+    "id": "evt_001",
+    "type": "weather",
+    "description": "Port closure, Gulf Coast, 48hrs — inbound alloy shipments held",
+    "affected_location": "Gulf Coast, LA",
+    "severity": "high",
+    "timestamp": "2026-09-12T14:05:00Z"
+  },
+  {
+    "id": "evt_002",
+    "type": "compliance",
+    "description": "Supplier audit finding: incomplete conflict-minerals filing",
+    "affected_location": "Memphis, TN",
+    "severity": "medium",
+    "timestamp": "2026-09-11T09:30:00Z"
+  },
+  {
+    "id": "evt_003",
+    "type": "financial",
+    "description": "Credit downgrade — supplier placed on negative watch after missed covenant",
+    "affected_location": "Greensboro, NC",
+    "severity": "medium",
+    "timestamp": "2026-09-10T16:45:00Z"
+  },
+  {
+    "id": "evt_004",
+    "type": "geopolitical",
+    "description": "Export licence suspension on rare-earth concentrate, indefinite",
+    "affected_location": "Antofagasta, CL",
+    "severity": "high",
+    "timestamp": "2026-09-09T07:15:00Z"
+  },
+  {
+    "id": "evt_005",
+    "type": "weather",
+    "description": "Typhoon landfall halts outbound freight, 72hrs",
+    "affected_location": "Nagoya, JP",
+    "severity": "high",
+    "timestamp": "2026-09-08T22:00:00Z"
+  }
+]
