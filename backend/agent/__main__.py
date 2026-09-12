@@ -35,7 +35,7 @@ def run_module_suite(filename: str) -> tuple[bool, str]:
 
 
 def main() -> int:
-    from backend.agent import narrate, propagation
+    from backend.agent import narrate, openclaw, propagation
 
     print("=" * 72)
     print("  backend/agent self-test")
@@ -45,7 +45,7 @@ def main() -> int:
 
     # --- 1. the two module suites -------------------------------------------
     print("\n  module suites")
-    for filename in ("propagation.py", "narrate.py"):
+    for filename in ("propagation.py", "narrate.py", "openclaw.py"):
         ok, summary = run_module_suite(filename)
         print(f"    [{'PASS' if ok else 'FAIL'}] {filename:<16} {summary}")
         failures += 0 if ok else 1
@@ -96,7 +96,34 @@ def main() -> int:
             line += f"   got: {detail}"
         print(line)
 
-    # --- 3. what the narration is actually doing right now ------------------
+    # --- 3. the approval hand-off (OpenClaw) --------------------------------
+    print("\n  integration: AnalysisResult -> OpenClaw approval request")
+    approval_checks: list[tuple[str, bool, str]] = []
+    demo_event = events[0]
+    risk = propagation.get_affected_suppliers(demo_event, suppliers)
+    result = {
+        "event": demo_event,
+        "directly_affected": risk["directly_affected"],
+        "cascading_affected": risk["cascading_affected"],
+        "risk_summary": narrate.generate_risk_summary(demo_event, risk["directly_affected"], risk["cascading_affected"], suppliers),
+        "draft_report": narrate.generate_draft_report(demo_event, risk["directly_affected"], risk["cascading_affected"], suppliers),
+    }
+    delivery = openclaw.request_approval(result, risk)
+
+    for label, ok, detail in [
+        ("approval request is built regardless of gateway state", bool(delivery["request"]["text"]), ""),
+        ("approval carries the draft report", "Recommended next steps" in delivery["request"]["text"] or "recommend" in delivery["request"]["text"].lower(), ""),
+        ("approval carries the affected ids", all(i in delivery["request"]["text"] for i in risk["directly_affected"]), ""),
+        ("approval states nothing was sent", "Nothing has been sent" in delivery["request"]["text"], ""),
+        ("delivery outcome is reported honestly", isinstance(delivery["delivered"], bool) and bool(delivery["detail"]), delivery["detail"]),
+    ]:
+        approval_checks.append((label, ok, detail))
+        print(f"    [{'PASS' if ok else 'FAIL'}] {label}")
+        if not ok:
+            failures += 1
+    print(f"    -> delivered={delivery['delivered']} ({delivery['detail']})")
+
+    # --- 4. what the narration is actually doing right now ------------------
     health = narrate.narration_health()
     print("\n  narration mode")
     print(f"    model      : {health['model']}")
@@ -105,6 +132,9 @@ def main() -> int:
     print(f"    active mode: {health['mode']}")
     if health.get("error"):
         print(f"    note       : {health['error']}")
+    oc = health.get("openclaw") or {}
+    print(f"    openclaw   : enabled={oc.get('enabled')} harness={oc.get('harness_available')} "
+          f"{('- ' + oc['detail']) if oc.get('detail') else ''}")
 
     print()
     print("=" * 72)

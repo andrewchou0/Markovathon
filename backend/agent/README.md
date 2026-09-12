@@ -5,14 +5,16 @@ Two modules, one rule: **`propagation.py` decides, `narrate.py` describes.**
 | File | Job | Depends on |
 | --- | --- | --- |
 | `propagation.py` | which suppliers are hit, what cascades, how bad | nothing — stdlib only |
-| `narrate.py` | the two prose fields, via local Ollama | `httpx` if present, else stdlib |
+| `narrate.py` | the two prose fields, via OpenClaw or Ollama | `httpx` if present, else stdlib |
+| `openclaw.py` | OpenClaw gateway: model harness + approval channel | `httpx` if present, else stdlib |
 | `mock_ollama.py` | test fixture: a fake model on localhost | stdlib only |
+| `mock_openclaw.py` | test fixture: a fake OpenClaw gateway | stdlib only |
 | `__main__.py` | `python -m backend.agent` — full self-test | the above |
 
 ## Status: done, green, and integrated with Person 2
 
 ```bash
-python -m backend.agent          # 92 checks: both suites + the API handoff
+python -m backend.agent          # 123 checks: all three suites + both handoffs
 ```
 
 Runs with **no API, no frontend, no MongoDB and no Ollama**. Needs nothing started.
@@ -29,6 +31,9 @@ checks**, all 5 seeded events, every `AnalysisResult` validated against
 - CORS allows Vite's origin
 - **with the model completely down, `POST /api/analyze` still returns HTTP 200 with
   full prose in 0.57s** — no hang, no 500, nothing logged as an error
+- with the OpenClaw gateway enabled, narration is generated **through the gateway** and
+  the approval request is **delivered to a channel** — verified through Person 2's real
+  API, 43 further checks on the gateway paths alone
 
 ## Wiring it up — for Person 2
 
@@ -62,6 +67,34 @@ Things you do not need to handle:
 - I take plain dicts and return plain dicts. I never import `pymongo` and never see an
   `_id`, as long as your repository layer keeps projecting `{"_id": 0}`.
 
+## OpenClaw — for Person 2
+
+Two jobs, both documented in `contracts/openclaw.md`. It is **off unless
+`OPENCLAW_ENABLE=1`**, so nothing on your machine changes until Person 4 turns it on.
+
+**Job 1, the model harness** needs nothing from you. `narrate.py` routes through the
+gateway when it's enabled and drops back to direct Ollama when it isn't. Same function
+signatures, same return values.
+
+**Job 2, the approval channel** is the one endpoint I'd ask for when you have a moment.
+This is the whole body:
+
+```python
+from backend.agent import openclaw, propagation
+
+@app.post("/api/actions/approve")
+def approve(body: DraftRequest) -> dict:
+    result = body.analysis_result
+    suppliers = repository.get_all_suppliers()
+    risk = propagation.get_affected_suppliers(result.get("event") or {}, suppliers)
+    return openclaw.request_approval(result, risk)
+```
+
+Returns `{"delivered": bool, "channel": str, "tool": str|None, "detail": str,
+"request": {...}}`. It never raises, and `request` is always populated even when
+delivery fails — so Person 3 can show what *would* have been sent. No try/except
+needed.
+
 ## Extra keys you can ignore, or use — for Person 3
 
 `get_affected_suppliers()` returns the two contract keys **plus** these. Additive only;
@@ -87,8 +120,13 @@ narrate.narration_health()     # never raises, never blocks beyond the connect t
 # -> {"model", "host", "host_is_local", "reachable", "model_present", "mode", "stats", ...}
 ```
 
-`mode` is `"llm"` or `"deterministic"`, so `/api/offline-status` can show what is
-actually generating the text rather than asserting it.
+`mode` is `"openclaw"`, `"llm"` or `"deterministic"`, so `/api/offline-status` can show
+what is actually generating the text rather than asserting it. The response also carries
+an `openclaw` sub-dict (`enabled`, `reachable`, `harness_available`, `detail`).
+
+**Allowlist `localhost:18789`** alongside 11434 and 27017 — that's the OpenClaw
+gateway. And note the gateway is probably your best closing beat: the approval request
+lands in a real chat app with nothing leaving the machine.
 
 Two things worth knowing for your hook:
 
@@ -111,7 +149,12 @@ but you'll silently get fallback prose instead of model prose and wonder why.
 
 ## How reliability is achieved
 
-The LLM is the only component that can fail, so it is the only one with a safety net:
+The generation chain is **OpenClaw gateway -> direct Ollama -> deterministic
+narrator**. OpenClaw is layered on rather than substituted in, deliberately: routing
+through a gateway makes the model a swappable plugin, but it also adds a component that
+can be down, and `POST /api/analyze` must not be able to fail because of it.
+
+The model is the only component that can fail, so it is the only one with a safety net:
 
 1. **Connect fast, read patiently** — 3s connect, 90s read (`OLLAMA_READ_TIMEOUT`).
 2. **Retry once, but never a timeout** — re-waiting a 90s timeout in front of an
@@ -175,8 +218,11 @@ model's phrasing clears the quality gate. First person with Ollama running shoul
 
 ```bash
 env -u OLLAMA_HOST python backend/agent/narrate.py
-```
-
-and post the reported latency. If the real thing is slow or its prose trips the gate,
+``` The same applies to OpenClaw: the gateway paths are
+verified against `mock_openclaw.py`, but **no real gateway has been contacted** — it
+isn't installed on this machine (no binary, no `~/.openclaw`, no process). Two things
+need confirming against a live one: the real name of the message-sending tool (the
+docs never state it, so `openclaw.py` discovers it by probing), and whether
+`chatCompletions` is enabled in your config. If the real thing is slow or its prose trips the gate,
 those are both one-constant changes in `narrate.py` — and the fallback covers the demo
 in the meantime.

@@ -1,7 +1,7 @@
 # /contracts — source of truth
 
-Three shapes, the LLM call, and the database. Everything else in this repo is built
-against these.
+Three shapes, the LLM call, the database, and the OpenClaw gateway. Everything else in
+this repo is built against these.
 
 | File | What it pins down |
 | --- | --- |
@@ -10,6 +10,7 @@ against these.
 | `analysis_result.schema.json` | the response body of `POST /api/analyze` |
 | `llm.md` | the Ollama host, model (`qwen3.6:35b`) and request shape |
 | `storage.md` | local MongoDB: URI, db/collections, the `_id` rule, seeding |
+| `openclaw.md` | the local OpenClaw gateway: model harness + approval channel |
 | `examples/` | copy-pasteable real payloads — start here |
 
 ## How to use this

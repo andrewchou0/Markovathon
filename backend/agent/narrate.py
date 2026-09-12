@@ -70,11 +70,24 @@ MIN_ACCEPTABLE_CHARS = 40
 STATS: dict[str, Any] = {
     "llm_calls": 0,
     "llm_failures": 0,
+    "harness_fallbacks": 0,   # OpenClaw tried, then dropped to direct Ollama
     "fallbacks_used": 0,
-    "last_mode": None,        # "llm" | "deterministic"
+    "last_mode": None,        # "openclaw" | "llm" | "deterministic"
     "last_latency_s": None,
     "last_error": None,
 }
+
+
+# OpenClaw is the preferred harness when it's switched on. Imported defensively
+# so this file still runs directly (python backend/agent/narrate.py) and still
+# works if openclaw.py is absent.
+try:  # pragma: no cover - import-time branch
+    from backend.agent import openclaw
+except ImportError:  # pragma: no cover
+    try:
+        import openclaw
+    except ImportError:
+        openclaw = None
 
 
 class LLMUnavailable(RuntimeError):
@@ -179,6 +192,25 @@ def _call_ollama(prompt: str, num_predict: int) -> str:
             time.sleep(0.25)
 
     raise LLMUnavailable(str(last_exc) or "unknown failure")
+
+
+def _generate(prompt: str, num_predict: int) -> tuple[str, str]:
+    """Get text from the best available model path. Returns (text, mode).
+
+    The chain is OpenClaw harness -> direct Ollama -> (caller falls back to the
+    deterministic narrator). Routing through OpenClaw makes the model a swappable
+    gateway plugin, but it adds a component that can be down, so it is a
+    preference and not a dependency: if the gateway is off, absent, or
+    misconfigured we drop to the direct Ollama call that was always here.
+    """
+    if openclaw is not None and openclaw.ENABLED:
+        try:
+            return openclaw.chat_completion(prompt, TEMPERATURE), "openclaw"
+        except BaseException as exc:  # noqa: BLE001
+            STATS["harness_fallbacks"] += 1
+            STATS["last_error"] = f"openclaw: {exc}"[:200]
+
+    return _call_ollama(prompt, num_predict), "llm"
 
 
 # --- output sanitizing ------------------------------------------------------
@@ -468,8 +500,9 @@ def generate_risk_summary(event, directly_affected, cascading_affected, supplier
         f"{_fact_block(facts)}\n\n{_RULES}"
     )
     try:
-        text = _quality_gate(_clean(_call_ollama(prompt, num_predict=220)), facts["names"])
-        return _finish(_clamp_sentences(text, SUMMARY_SENTENCES), "llm")
+        raw, mode = _generate(prompt, num_predict=220)
+        text = _quality_gate(_clean(raw), facts["names"])
+        return _finish(_clamp_sentences(text, SUMMARY_SENTENCES), mode)
     except BaseException:  # noqa: BLE001 - the whole point: never fail
         return _finish(_fallback_summary(facts), "deterministic")
 
@@ -487,8 +520,9 @@ def generate_draft_report(event, directly_affected, cascading_affected, supplier
         f"{_fact_block(facts)}\n\n{_RULES}"
     )
     try:
-        text = _quality_gate(_clean(_call_ollama(prompt, num_predict=520)), facts["names"])
-        return _finish(_ensure_email_header(text, facts), "llm")
+        raw, mode = _generate(prompt, num_predict=520)
+        text = _quality_gate(_clean(raw), facts["names"])
+        return _finish(_ensure_email_header(text, facts), mode)
     except BaseException:  # noqa: BLE001
         return _finish(_fallback_report(facts), "deterministic")
 
@@ -509,6 +543,14 @@ def narration_health(probe: bool = True) -> dict:
         "mode": "deterministic",
         "stats": dict(STATS),
     }
+    # Reported before any Ollama-specific early return: the gateway leg and the
+    # direct-Ollama leg are independent, so a bad OLLAMA_HOST must not hide the
+    # gateway's status from the status endpoint.
+    if openclaw is not None:
+        health["openclaw"] = openclaw.health() if probe else {"enabled": openclaw.ENABLED}
+        if health["openclaw"].get("harness_available"):
+            health["mode"] = "openclaw"  # the gateway answers, so narration uses it
+
     if not HOST_IS_LOCAL:
         health["error"] = (
             f"OLLAMA_HOST {OLLAMA_HOST!r} is not local — refused without contacting it"
@@ -527,7 +569,8 @@ def narration_health(probe: bool = True) -> dict:
     base = OLLAMA_MODEL.split(":")[0]
     health["model_present"] = any(n == OLLAMA_MODEL or n.startswith(base) for n in names)
     health["available_models"] = names
-    health["mode"] = "llm" if health["model_present"] else "deterministic"
+    if health["mode"] != "openclaw":
+        health["mode"] = "llm" if health["model_present"] else "deterministic"
     return health
 
 
@@ -629,6 +672,22 @@ if __name__ == "__main__":
     check("header: missing subject is filled in alongside an existing To:", partial.count("To:") == 1 and "Subject: Supply disruption" in partial)
     check("header: subject avoids nested dashes", partial.splitlines()[1].count("—") == 2, partial.splitlines()[1])
     check("header: survives empty input", _ensure_email_header("", _f).splitlines()[0].startswith("To: "))
+
+    # --- the OpenClaw harness chain -----------------------------------------
+    check("openclaw module is importable", openclaw is not None)
+    if openclaw is not None:
+        check("openclaw is off unless explicitly enabled",
+              openclaw.ENABLED is False or bool(os.getenv("OPENCLAW_ENABLE")))
+        # With OpenClaw off, _generate must go straight to the Ollama path and
+        # must not record a harness fallback.
+        before = STATS["harness_fallbacks"]
+        try:
+            _generate("probe", 16)
+        except LLMUnavailable:
+            pass
+        check("disabled openclaw is not counted as a harness fallback",
+              STATS["harness_fallbacks"] == before if not openclaw.ENABLED else True)
+        check("health reports the openclaw leg", "openclaw" in narration_health(probe=False))
 
     # --- degenerate inputs must still produce prose -------------------------
     hard_cases = [
