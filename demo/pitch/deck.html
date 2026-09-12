@@ -40,6 +40,15 @@
   .slide[data-active="true"]{display:flex; flex-direction:column; justify-content:center;}
   .inner{width:100%; max-width:1080px; margin-inline:auto;}
 
+  .wordmark{display:flex; align-items:center; gap:11px; margin:0 0 clamp(18px,3vh,30px);}
+  .wordmark svg{display:block; flex:none;}
+  .wordmark .name{font-family:"Saira Condensed",sans-serif; font-size:clamp(26px,3.4vw,38px); font-weight:700; letter-spacing:.02em; text-transform:uppercase; line-height:1;}
+  .wordmark .tag{
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--brass); border:1px solid var(--brass-dim); padding:4px 8px; margin-left:4px;
+  }
+  .slide[data-active="true"] .wordmark{animation:rise .45s ease-out both;}
+
   .eyebrow{
     display:flex; align-items:baseline; gap:.9em; flex-wrap:wrap;
     margin:0 0 clamp(14px,2.4vh,26px);
@@ -135,6 +144,31 @@
   .refuse b{font-family:"Saira Condensed",sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--oxide); display:block; margin-bottom:5px; font-size:14px;}
   .refuse p{font-size:14px; color:var(--ink-2); margin:0;}
 
+  /* ---- bill of materials: defense programs ship one, so the stack is styled as one ---- */
+  .bom{display:flex; flex-direction:column; gap:2px; margin-block:clamp(14px,2vh,22px);}
+  .bom .head,.bom .line{display:grid; grid-template-columns:26px minmax(120px,1.15fr) minmax(130px,1.5fr) minmax(96px,.8fr); gap:2px; align-items:stretch;}
+  .bom .head span{
+    background:transparent; padding:0 10px 6px; font-family:"JetBrains Mono",monospace;
+    font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--brass-dim);
+  }
+  .bom .line > *{background:var(--surface); padding:9px 10px; font-size:13.5px; display:flex; align-items:center;}
+  .bom .line .ref{font-family:"JetBrains Mono",monospace; font-size:10px; color:var(--muted); justify-content:center;}
+  .bom .line .item{font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--ink);}
+  .bom .line .role{color:var(--ink-2); line-height:1.35;}
+  .bom .line .where{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--brass); justify-content:flex-end; text-align:right;}
+  .bom .line.ours .item{color:var(--brass-lift);}
+  .bom .line.ours > *{background:var(--surface-2);}
+  .bom-foot{margin:12px 0 0; font-size:13.5px; color:var(--ink-2); max-width:var(--measure);}
+  .bom-foot strong{color:var(--brass-lift); font-weight:500;}
+
+  /* ---- a role split, for the one component doing two jobs ---- */
+  .twojobs{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); margin-block:clamp(12px,2vh,20px);}
+  .job{background:var(--surface); padding:16px 18px; border-left:3px solid var(--brass);}
+  .job .n{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--brass-dim); display:block; margin-bottom:5px;}
+  .job b{font-family:"Saira Condensed",sans-serif; font-size:17px; text-transform:uppercase; letter-spacing:.02em; display:block; margin-bottom:6px;}
+  .job p{font-size:13.5px; color:var(--ink-2); margin:0 0 6px; max-width:none;}
+  .job code{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--brass); background:var(--ground); padding:2px 5px;}
+
   .chips{display:flex; flex-wrap:wrap; gap:6px; margin-block:clamp(14px,2vh,22px);}
   .chip{background:var(--surface-2); color:var(--ink-2); padding:7px 12px; font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.04em;}
   .chip b{color:var(--brass-lift); font-weight:500;}
@@ -175,8 +209,61 @@
     .hint{display:none;}
     .marking{font-size:9px; letter-spacing:.08em; flex-wrap:wrap;}
   }
+  /* ---- motion: elements rise as a slide takes the screen ---- */
+  @keyframes rise{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
+  @keyframes grow{from{transform:scaleX(.04); opacity:.3;} to{transform:scaleX(1); opacity:1;}}
+  @keyframes ignite{from{opacity:.25; border-top-color:var(--line);} to{opacity:1;}}
+  @keyframes sweep{from{background-position:-140% 0;} to{background-position:240% 0;}}
+
+  .slide[data-active="true"] .eyebrow{animation:rise .42s ease-out both;}
+  .slide[data-active="true"] h1,
+  .slide[data-active="true"] h2{animation:rise .5s ease-out .06s both;}
+  .slide[data-active="true"] .lede,
+  .slide[data-active="true"] .define,
+  .slide[data-active="true"] .calc,
+  .slide[data-active="true"] .clock{animation:rise .5s ease-out .16s both;}
+  .slide[data-active="true"] .kicker,
+  .slide[data-active="true"] .refuse,
+  .slide[data-active="true"] .chips{animation:rise .5s ease-out .3s both;}
+  .slide[data-active="true"] .cite,
+  .slide[data-active="true"] .bom-foot{animation:rise .5s ease-out .44s both;}
+  /* tiles, columns, stack rows and pipeline stages stagger in reading order;
+     the cascade bars build outward in tier order, because that reveal IS the product */
+  .slide[data-active="true"] .tiles>.tile,
+  .slide[data-active="true"] .cols>.col,
+  .slide[data-active="true"] .pipe>.stage,
+  .slide[data-active="true"] .bom>.line,
+  .slide[data-active="true"] .twojobs>.job{animation:rise .46s ease-out both;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(1){animation-delay:0.165s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(2){animation-delay:0.230s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(3){animation-delay:0.295s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(4){animation-delay:0.360s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(5){animation-delay:0.425s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(6){animation-delay:0.490s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(7){animation-delay:0.555s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(8){animation-delay:0.620s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(9){animation-delay:0.685s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(10){animation-delay:0.750s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(11){animation-delay:0.815s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(12){animation-delay:0.880s;}
+  .slide[data-active="true"] :is(.tiles,.cols,.pipe,.bom,.twojobs)>*:nth-child(13){animation-delay:0.945s;}
+  .slide[data-active="true"] .ladder>.rung>.bar{transform-origin:left center; animation:grow .52s cubic-bezier(.2,.7,.3,1) both;}
+  .slide[data-active="true"] .ladder>.rung:nth-child(1)>.bar{animation-delay:0.48s;}
+  .slide[data-active="true"] .ladder>.rung:nth-child(2)>.bar{animation-delay:0.70s;}
+  .slide[data-active="true"] .ladder>.rung:nth-child(3)>.bar{animation-delay:0.92s;}
+  .slide[data-active="true"] .ladder>.rung:nth-child(4)>.bar{animation-delay:1.14s;}
+  /* a pulse travels the pipeline once, in the direction the data flows */
+  .slide[data-active="true"] .pipe::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(100deg,transparent 42%,rgba(227,196,131,.16) 50%,transparent 58%);
+    background-size:60% 100%; background-repeat:no-repeat;
+    animation:sweep 1.5s ease-in-out .75s 1 both;
+  }
+  .pipe{position:relative;}
+
   @media (prefers-reduced-motion:reduce){
-    *{transition:none!important; animation:none!important;}
+    *,*::after,*::before{transition:none!important; animation:none!important;}
+    .slide[data-active="true"] .rung .bar{transform:none!important; opacity:1!important;}
   }
 </style>
 
@@ -191,7 +278,17 @@
   <!-- 01 -->
   <section class="slide" data-active="true">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">01</span><span>Why we built this</span><span class="of">/ 10</span></p>
+      <p class="wordmark">
+        <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+          <rect x="1"  y="21" width="6" height="12" fill="#8e7133"></rect>
+          <rect x="10" y="14" width="6" height="19" fill="#c8a04a"></rect>
+          <rect x="19" y="7"  width="6" height="26" fill="#e3c483"></rect>
+          <rect x="28" y="1"  width="5" height="32" fill="#d4553f"></rect>
+        </svg>
+        <span class="name">Markov</span>
+        <span class="tag">Built in one day &middot; GB10 &middot; no cloud API</span>
+      </p>
+      <p class="eyebrow"><span class="idx">01</span><span>Why we built this</span><span class="of">/ 11</span></p>
       <h1>Everyone shipped a cloud agent.<br><em>The people who need one most are not allowed to use it.</em></h1>
       <p class="lede">This year every useful AI agent became a request to somebody else's datacenter. That is fine if you sell shoes. The American defense industrial base cannot send a supplier list, a part number, or a program schedule to a commercial model &mdash; not as policy, as <strong>law</strong>.</p>
       <p class="lede">So the organizations carrying the most fragile supply chains in the country were handed exactly none of this decade's tooling. We built the agent they are permitted to run: it never leaves the machine it is installed on.</p>
@@ -202,7 +299,7 @@
   <!-- 02 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">02</span><span>Naming it properly</span><span class="of">/ 10</span></p>
+      <p class="eyebrow"><span class="idx">02</span><span>Naming it properly</span><span class="of">/ 11</span></p>
       <h2>We do not build for <em>&ldquo;disruptions.&rdquo;</em> A disruption is weather.</h2>
       <div class="define">
         <p class="term">Plan-invalidating event</p>
@@ -221,7 +318,7 @@
   <!-- 03 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">03</span><span>The market</span><span class="of">/ 10</span></p>
+      <p class="eyebrow"><span class="idx">03</span><span>The market</span><span class="of">/ 11</span></p>
       <h2>A hundred thousand companies, and the one that stops the program is <em>invisible</em></h2>
       <div class="tiles">
         <div class="tile count"><span class="fig">100,000+</span><span class="what">Companies and subcontractors under contract in the defense industrial base.</span><span class="src">CISA, DIB sector</span></div>
@@ -237,7 +334,7 @@
   <!-- 04 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">04</span><span>The annual bill</span><span class="of">/ 10</span></p>
+      <p class="eyebrow"><span class="idx">04</span><span>The annual bill</span><span class="of">/ 11</span></p>
       <h2>What a year of unexecutable plans actually costs</h2>
       <div class="tiles">
         <div class="tile cost"><span class="fig">$1.4T</span><span class="what">Lost annually to unplanned downtime across the world's 500 largest companies &mdash; <strong>11% of total revenue</strong>, up from 8% in 2019.</span><span class="src">Siemens, 2024</span></div>
@@ -257,7 +354,7 @@
   <!-- 05 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">05</span><span>The minute</span><span class="of">/ 10</span></p>
+      <p class="eyebrow"><span class="idx">05</span><span>The minute</span><span class="of">/ 11</span></p>
       <h2>A large plant loses <em>$33,000 a minute</em>. The clock starts before anyone knows why.</h2>
       <div class="clock">
         <p class="rate">Accruing at $33,000 / minute &mdash; since this slide appeared</p>
@@ -272,7 +369,7 @@
   <!-- 06 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">06</span><span>Why it must be local</span><span class="of">/ 10</span></p>
+      <p class="eyebrow"><span class="idx">06</span><span>Why it must be local</span><span class="of">/ 11</span></p>
       <h2>Sending this to a cloud model is not a privacy preference. It may be an <em>unlicensed export.</em></h2>
       <div class="cols">
         <div class="col"><h3>Person-based, not geographic</h3><p>ITAR restricts access by foreign persons regardless of where the server sits. If a provider's infrastructure is operated by or accessible to foreign nationals, sending controlled technical data to it can constitute an export without a licence.</p></div>
@@ -290,34 +387,14 @@
   <!-- 07 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">07</span><span>What we built</span><span class="of">/ 10</span></p>
-      <h2>An agent that watches the network, traces the exposure, and drafts the response &mdash; on one box</h2>
-      <div class="cols">
-        <div class="col"><h3>It watches</h3><p>Unattended. It wakes on a timer, assesses every event it has not seen, and escalates only what clears a severity and risk floor &mdash; logging what it ignored, and why.</p></div>
-        <div class="col"><h3>It traces</h3><p>Three tiers deep through the dependency graph, naming the sole-source firms in the path and scoring the exposure of each.</p></div>
-        <div class="col"><h3>It drafts</h3><p>A written assessment and a response email addressed to the reviewer who can approve it. Nothing is ever sent without a human.</p></div>
-      </div>
-      <div class="chips">
-        <span class="chip">exposure traced in <b>0.57s</b> with the model switched off</span>
-        <span class="chip"><b>3</b> tiers of visibility</span>
-        <span class="chip"><b>220</b> automated checks</span>
-        <span class="chip">external calls made: <b>0</b></span>
-      </div>
-      <p class="kicker">It has no failure mode that shows you nothing. Exposure is computed deterministically, so if the language model is unavailable the assessment still arrives &mdash; written by template, correct, and clearly marked as such.</p>
-      <p class="cite">Figures measured on the delivered build, not projected.</p>
-    </div>
-  </section>
-
-  <!-- 08 -->
-  <section class="slide">
-    <div class="inner">
-      <p class="eyebrow"><span class="idx">08</span><span>How it works</span><span class="of">/ 10</span></p>
-      <h2>The model writes. It never decides <em>who is affected.</em></h2>
+      <p class="eyebrow"><span class="idx">07</span><span>What we built, and how</span><span class="of">/ 11</span></p>
+      <h2>It watches unattended, traces three tiers, and drafts the response. The model writes &mdash; it never decides <em>who is affected.</em></h2>
       <div class="pipe">
         <div class="stage"><span class="n">01 &middot; local</span><b>MongoDB</b><span>Suppliers, parts, sole-source flags, the dependency graph. Loopback only; a hosted URI is refused at startup.</span></div>
         <div class="stage deterministic"><span class="n">02 &middot; deterministic</span><b>propagation.py</b><span>Who is hit and how far it cascades. Plain Python, cycle-safe, same answer every run. No model involved.</span></div>
-        <div class="stage"><span class="n">03 &middot; local</span><b>Qwen via OpenClaw</b><span>Given the resolved names, writes the assessment and the draft. It is never asked which suppliers matter.</span></div>
-        <div class="stage"><span class="n">04 &middot; human</span><b>Approval</b><span>Delivered to the reviewer in the channel they already use. Unsent until a person says so.</span></div>
+        <div class="stage"><span class="n">03 &middot; openclaw</span><b>Gateway &rarr; Qwen</b><span>The gateway runs the prompt through its agent. Given resolved names, the model writes &mdash; it is never asked which suppliers matter.</span></div>
+        <div class="stage"><span class="n">04 &middot; openclaw</span><b>Channel &rarr; reviewer</b><span>The draft is delivered to the person who can approve it, in the chat app they already use.</span></div>
+        <div class="stage"><span class="n">05 &middot; human</span><b>Approval</b><span>Unsent until a person says so. Every decision, including the ones it suppressed, is on the audit trail.</span></div>
       </div>
       <p class="lede">That split is the whole safety argument: a model cannot name the wrong supplier if it was never asked to choose one. A generated sentence that mentions none of the identified firms is rejected before anyone reads it.</p>
       <div class="ladder">
@@ -326,14 +403,71 @@
         <div class="rung"><span class="tag">tier 2</span><span class="bar"><b>2 suppliers</b><span>turbocharger subassembly &middot; wiring harness</span></span></div>
         <div class="rung"><span class="tag">tier 3</span><span class="bar"><b>Finished powertrain module</b><span>the deliverable</span></span></div>
       </div>
+      <div class="chips">
+        <span class="chip">exposure traced in <b>0.57s</b> with the model switched off</span>
+        <span class="chip"><b>3</b> tiers of visibility</span>
+        <span class="chip"><b>220</b> automated checks</span>
+        <span class="chip">external calls made: <b>0</b></span>
+      </div>
+      <p class="kicker">It has no failure mode that shows you nothing. Exposure is computed deterministically, so if the language model is unavailable the assessment still arrives &mdash; written by template, correct, and clearly marked as such.</p>
       <p class="cite">Worked example from the running system: one licence suspension, six firms exposed, network risk 0.961 &mdash; four tiers from the product that ships.</p>
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">08</span><span>Built with</span><span class="of">/ 11</span></p>
+      <h2>Eleven components. Every one of them on <em>the box.</em></h2>
+      <div class="bom">
+        <div class="head"><span>Ref</span><span>Component</span><span>Function</span><span>Runs at</span></div>
+        <div class="line"><span class="ref">A1</span><span class="item">NVIDIA GB10</span><span class="role">The box. Everything below this line runs on it.</span><span class="where">on&nbsp;prem</span></div>
+        <div class="line"><span class="ref">A2</span><span class="item">Qwen 3.6 35B</span><span class="role">Language model. Writes the assessment and the draft.</span><span class="where">local weights</span></div>
+        <div class="line"><span class="ref">A3</span><span class="item">Ollama</span><span class="role">Serves the model on the box.</span><span class="where">:11434</span></div>
+        <div class="line ours"><span class="ref">A4</span><span class="item">OpenClaw</span><span class="role">Agent gateway. Two jobs &mdash; below.</span><span class="where">:18789</span></div>
+        <div class="line"><span class="ref">A5</span><span class="item">MongoDB 7</span><span class="role">The supplier graph and the event log.</span><span class="where">:27017</span></div>
+        <div class="line"><span class="ref">A6</span><span class="item">FastAPI + uvicorn</span><span class="role">Five endpoints, thin routing, no logic.</span><span class="where">:8000</span></div>
+        <div class="line"><span class="ref">A7</span><span class="item">React 19 + Vite</span><span class="role">The operations workspace.</span><span class="where">:5173</span></div>
+        <div class="line ours"><span class="ref">B1</span><span class="item">propagation.py</span><span class="role">Ours. Deterministic exposure. No model, no network.</span><span class="where">in&nbsp;process</span></div>
+        <div class="line ours"><span class="ref">B2</span><span class="item">monitor.py</span><span class="role">Ours. The unattended loop, thresholds, audit trail.</span><span class="where">daemon thread</span></div>
+        <div class="line ours"><span class="ref">B3</span><span class="item">narrate.py</span><span class="role">Ours. Sanitises, gates, and falls back so text always arrives.</span><span class="where">in&nbsp;process</span></div>
+        <div class="line ours"><span class="ref">B4</span><span class="item">267 checks</span><span class="role">143 agent core &middot; 77 end-to-end &middot; 30 handoff &middot; 17 frontend.</span><span class="where">green</span></div>
+      </div>
+      <p class="bom-foot">Outbound internet connections required at run time: <strong>zero</strong>. The rows marked in brass are ours; the rest is off-the-shelf and stays on the machine.</p>
+      <p class="cite">Ports are loopback bindings. A non-local host for the model, the gateway or the database is refused before a socket opens.</p>
     </div>
   </section>
 
   <!-- 09 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">09</span><span>What it saves</span><span class="of">/ 10</span></p>
+      <p class="eyebrow"><span class="idx">09</span><span>OpenClaw, twice</span><span class="of">/ 11</span></p>
+      <h2>One component does the two jobs a <em>local</em> agent actually needs</h2>
+      <div class="twojobs">
+        <div class="job">
+          <span class="n">Job 01 &mdash; model harness</span>
+          <b>The model becomes a plug, not a hard-wire</b>
+          <p>We do not call the model directly. We post the prompt to the gateway&rsquo;s OpenAI-compatible endpoint and its agent resolves which model answers.</p>
+          <p><code>POST /v1/chat/completions</code></p>
+          <p>Its config names the model: <code>ollama/qwen3.6:35b</code>. Swapping to a larger model, or to a different one entirely, is a line of config &mdash; not a code change.</p>
+        </div>
+        <div class="job">
+          <span class="n">Job 02 &mdash; approval channel</span>
+          <b>The draft reaches a human where they already are</b>
+          <p>An agent that drafts a response for approval has to reach the person who approves. OpenClaw speaks Slack, Telegram, iMessage, Teams and more, from the box.</p>
+          <p><code>POST /tools/invoke</code><br><code>x-openclaw-message-channel: slack</code></p>
+          <p>No inbox to check, no dashboard to remember. The exposure summary and the draft arrive in the thread they already work in.</p>
+        </div>
+      </div>
+      <p class="kicker">And it is layered, never depended on. The chain is <strong>OpenClaw &rarr; direct Ollama &rarr; deterministic template</strong>: if the gateway is off, unauthorised, or has that endpoint disabled, the assessment still arrives. Adding a gateway must not add a way to fail.</p>
+      <p class="cite">Gateway on 127.0.0.1:18789 &middot; auth via bearer token &middot; a non-local gateway host is refused without a socket being opened</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">10</span><span>What it saves</span><span class="of">/ 11</span></p>
       <h2>We do not shorten the repair. We shorten the distance between the event and the <em>decision.</em></h2>
       <div class="calc">
         <div class="row"><span class="k">Rate while the plan is unexecutable</span><span class="v">$33,000 / min</span></div>
@@ -351,10 +485,10 @@
     </div>
   </section>
 
-  <!-- 10 -->
+  <!-- 11 -->
   <section class="slide">
     <div class="inner">
-      <p class="eyebrow"><span class="idx">10</span><span>Beyond defense</span><span class="of">/ 10</span></p>
+      <p class="eyebrow"><span class="idx">11</span><span>Beyond defense</span><span class="of">/ 11</span></p>
       <h2>Three conditions. Wherever all three hold, this is the <em>same product.</em></h2>
       <div class="cols">
         <div class="col"><h3>01 &middot; A dependency graph</h3><p>Things depend on things, more than one layer deep, and nobody can hold the whole graph in their head.</p></div>
@@ -377,7 +511,7 @@
 </div>
 
 <div class="chrome">
-  <p class="counter">SLIDE <b id="cur">01</b> / 10</p>
+  <p class="counter">SLIDE <b id="cur">01</b> / 11</p>
   <div class="dots" id="dots" role="tablist" aria-label="Slides"></div>
   <p class="hint">&larr; &rarr; or SPACE</p>
   <div class="nav">
@@ -435,7 +569,7 @@
     prevBtn.disabled = at === 0;
     nextBtn.disabled = at === slides.length - 1;
     window.scrollTo(0, 0);
-    if (at === 4) startClock(); else stopClock();
+    if (slides[at].contains(accrued)) startClock(); else stopClock();
   }
 
   prevBtn.addEventListener('click', () => show(at - 1));

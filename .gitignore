@@ -25,3 +25,5 @@ mongo-data/
 .DS_Store
 .idea/
 .vscode/
+
+# generated artifact — rebuild with: python demo/pitch/build_pptx.py
