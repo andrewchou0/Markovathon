@@ -1,0 +1,55 @@
+========================================================================
+  backend/agent self-test
+========================================================================
+
+  module suites
+    [PASS] propagation.py   28/28 checks passed
+    [PASS] narrate.py       55/55 checks passed
+    [PASS] openclaw.py      29/29 checks passed
+    [PASS] monitor.py       31/31 checks passed   (fixtures: backend/data/seed)
+
+  integration: propagation -> narrate -> AnalysisResult
+    [PASS] evt_001: result has exactly the contract keys
+    [PASS] evt_001: summary is non-empty prose          
+    [PASS] evt_001: report is non-empty prose           
+    [PASS] evt_001: id lists never overlap              
+    [PASS] evt_001: every id is a real supplier         
+    [PASS] evt_001: result is JSON-serializable         
+    [PASS] evt_001: no Mongo _id leaked through         
+    [PASS] evt_001: narration names an affected supplier
+    [PASS] evt_002: result has exactly the contract keys
+    [PASS] evt_002: summary is non-empty prose          
+    [PASS] evt_002: report is non-empty prose           
+    [PASS] evt_002: id lists never overlap              
+    [PASS] evt_002: every id is a real supplier         
+    [PASS] evt_002: result is JSON-serializable         
+    [PASS] evt_002: no Mongo _id leaked through         
+    [PASS] evt_002: narration names an affected supplier
+
+  integration: AnalysisResult -> OpenClaw approval request
+    [PASS] approval request is built regardless of gateway state
+    [PASS] approval carries the draft report
+    [PASS] approval carries the affected ids
+    [PASS] approval states nothing was sent
+    [PASS] delivery outcome is reported honestly
+    -> delivered=False (OpenClaw disabled (set OPENCLAW_ENABLE=1))
+
+  integration: unattended scan over the seeded events
+    [PASS] every event assessed without being asked
+    [PASS] high-risk events selected for a human
+    [PASS] low-risk events suppressed with a reason
+    [PASS] re-scanning alerts nobody twice
+    [PASS] every decision is on the audit trail
+    -> 2 assessed, 1 escalated, 1 suppressed
+
+  narration mode
+    model      : qwen3.6:35b
+    host       : http://127.0.0.1:11434  (local: True)
+    reachable  : False
+    active mode: deterministic
+    note       : URLError: <urlopen error [Errno 1] Operation not permitted>
+    openclaw   : enabled=False harness=False - disabled (set OPENCLAW_ENABLE=1)
+
+========================================================================
+  ALL GREEN — backend/agent is ready for the API layer
+========================================================================

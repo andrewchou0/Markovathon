@@ -23,6 +23,11 @@ import re
 import time
 from typing import Any
 
+try:
+    from backend.agent.transport import urlopen
+except ImportError:  # supports running this module directly
+    from transport import urlopen
+
 # --- configuration ----------------------------------------------------------
 # Per contracts/llm.md this is the ONE place the host and model are named.
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
@@ -54,7 +59,10 @@ def _host_of(url: str) -> str:
     from urllib.parse import urlparse
 
     try:
-        return (urlparse(url).hostname or "").lower()
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"}:
+            return ""
+        return (parsed.hostname or "").lower()
     except BaseException:  # noqa: BLE001
         return ""
 
@@ -127,7 +135,7 @@ def _post_json(url: str, payload: dict, read_timeout: float) -> dict:
     body = json.dumps(payload).encode("utf-8")
     if _TRANSPORT == "httpx":
         timeout = httpx.Timeout(read_timeout, connect=CONNECT_TIMEOUT_S)
-        response = httpx.post(url, content=body, headers={"Content-Type": "application/json"}, timeout=timeout)
+        response = httpx.post(url, content=body, headers={"Content-Type": "application/json"}, timeout=timeout, trust_env=False, follow_redirects=False)
         response.raise_for_status()
         return response.json()
 
@@ -135,7 +143,7 @@ def _post_json(url: str, payload: dict, read_timeout: float) -> dict:
     import urllib.request
 
     request = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(request, timeout=read_timeout) as response:  # noqa: S310 - localhost only
+    with urlopen(request, timeout=read_timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
@@ -144,13 +152,13 @@ def _get_json(url: str, read_timeout: float) -> dict:
     which would make a perfectly healthy Ollama look unreachable."""
     if _TRANSPORT == "httpx":
         timeout = httpx.Timeout(read_timeout, connect=CONNECT_TIMEOUT_S)
-        response = httpx.get(url, timeout=timeout)
+        response = httpx.get(url, timeout=timeout, trust_env=False, follow_redirects=False)
         response.raise_for_status()
         return response.json()
 
     import urllib.request
 
-    with urllib.request.urlopen(url, timeout=read_timeout) as response:  # noqa: S310 - localhost only
+    with urlopen(url, timeout=read_timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
 

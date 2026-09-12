@@ -26,6 +26,8 @@ Run it standalone:  python backend/agent/monitor.py
 from __future__ import annotations
 
 import os
+import math
+import copy
 import threading
 import time
 from collections import deque
@@ -50,6 +52,9 @@ LOG_LIMIT = int(os.getenv("MONITOR_LOG_LIMIT", "200"))
 _seen: set[str] = set()
 _log: deque[dict] = deque(maxlen=LOG_LIMIT)
 _lock = threading.Lock()
+_lifecycle_lock = threading.Lock()
+_inflight: set[str] = set()
+_generation = 0
 _thread: threading.Thread | None = None
 _stop = threading.Event()
 
@@ -79,19 +84,20 @@ def _record(entry: dict) -> dict:
 def activity(limit: int = 25) -> list[dict]:
     """Most recent decisions, newest first. For the UI and for the judges."""
     with _lock:
-        return list(_log)[-limit:][::-1]
+        return copy.deepcopy(list(_log)[-max(1, limit):][::-1])
 
 
 def status() -> dict:
     """Everything needed to prove the loop is alive and what it has done."""
     with _lock:
         state = dict(STATE)
+        seen = len(_seen)
     state.update(
         interval_s=INTERVAL_S,
         min_severity=MIN_SEVERITY,
         min_risk=MIN_RISK,
-        events_seen=len(_seen),
-        uptime_s=round(time.time() - STATE["started_at"], 1) if STATE["started_at"] else 0,
+        events_seen=seen,
+        uptime_s=round(time.time() - state["started_at"], 1) if state["started_at"] else 0,
     )
     return state
 
@@ -163,7 +169,7 @@ def assess(event: dict, suppliers: list[dict]) -> dict:
     }
 
 
-def scan_once(events: Any, suppliers: Any, force: bool = False) -> list[dict]:
+def scan_once(events: Any, suppliers: Any, force: bool = False, *, stop_event: threading.Event | None = None) -> list[dict]:
     """One pass. Returns one entry per event acted on; [] when there is nothing new.
 
     Never raises: a single malformed event is logged and skipped rather than
@@ -174,46 +180,72 @@ def scan_once(events: Any, suppliers: Any, force: bool = False) -> list[dict]:
 
     actions: list[dict] = []
     for event in events:
+        if stop_event is not None and stop_event.is_set():
+            break
         if not isinstance(event, dict):
             continue
         event_id = event.get("id")
         if not isinstance(event_id, str) or not event_id:
             continue
-        if event_id in _seen and not force:
-            continue
+        with _lock:
+            if event_id in _inflight or (event_id in _seen and not force):
+                continue
+            _inflight.add(event_id)
+            generation = _generation
 
         try:
             outcome = assess(event, suppliers)
-        except BaseException as exc:  # noqa: BLE001 - an unattended loop must not die
-            STATE["last_error"] = f"{type(event).__name__}/{event_id}: {exc}"[:200]
+        except Exception as exc:
+            with _lock:
+                if generation == _generation:
+                    STATE["last_error"] = f"{type(exc).__name__}/{event_id}: {exc}"[:200]
             outcome = {"event_id": event_id, "action": "error", "reason": str(exc)[:160]}
+        except BaseException:
+            with _lock:
+                if generation == _generation:
+                    _inflight.discard(event_id)
+            raise
 
-        _seen.add(event_id)
-        STATE["events_assessed"] += 1
-        if outcome["action"] == "alert_dispatched":
-            STATE["alerts_dispatched"] += 1
-        elif outcome["action"] == "assessed_no_alert":
-            STATE["below_threshold"] += 1
-
-        # The audit trail keeps the decision, not the payload.
-        _record({k: v for k, v in outcome.items() if k not in ("analysis", "risk")})
+        with _lock:
+            if generation != _generation:
+                continue  # a reset invalidated work already underway
+            _inflight.discard(event_id)
+            # A transient failure must be retried on the next tick. Successful
+            # decisions, including undelivered approvals, stay deduplicated.
+            if outcome["action"] != "error":
+                _seen.add(event_id)
+            STATE["events_assessed"] += 1
+            if outcome["action"] == "alert_dispatched":
+                STATE["alerts_dispatched"] += 1
+            elif outcome["action"] == "assessed_no_alert":
+                STATE["below_threshold"] += 1
+            # Commit the decision and audit entry atomically with deduplication.
+            _log.append({**{k: v for k, v in outcome.items() if k not in ("analysis", "risk")}, "at": _now()})
         actions.append(outcome)
 
     return actions
 
 
 def _loop(loader: Callable[[], tuple[list[dict], list[dict]]]) -> None:
-    while not _stop.is_set():
-        STATE["ticks"] += 1
-        STATE["last_tick_at"] = _now()
-        try:
-            events, suppliers = loader()
-            scan_once(events, suppliers)
-        except BaseException as exc:  # noqa: BLE001
-            STATE["last_error"] = f"{type(exc).__name__}: {exc}"[:200]
-            _record({"action": "tick_error", "reason": str(exc)[:160]})
-        _stop.wait(INTERVAL_S)
-    STATE["running"] = False
+    try:
+        while not _stop.is_set():
+            with _lock:
+                STATE["ticks"] += 1
+                STATE["last_tick_at"] = _now()
+                STATE["last_error"] = None
+            try:
+                events, suppliers = loader()
+                if not _stop.is_set():
+                    scan_once(events, suppliers, stop_event=_stop)
+            except Exception as exc:
+                with _lock:
+                    STATE["last_error"] = f"{type(exc).__name__}: {exc}"[:200]
+                _record({"action": "tick_error", "reason": str(exc)[:160]})
+            _stop.wait(INTERVAL_S)
+    finally:
+        with _lock:
+            STATE["running"] = False
+        _record({"action": "monitor_stopped", "reason": "worker exited"})
 
 
 def start(loader: Callable[[], tuple[list[dict], list[dict]]]) -> bool:
@@ -223,30 +255,47 @@ def start(loader: Callable[[], tuple[list[dict], list[dict]]]) -> bool:
     Person 2's repository, so this module keeps knowing nothing about storage.
     """
     global _thread
-    if _thread is not None and _thread.is_alive():
-        return False
-    _stop.clear()
-    STATE.update(running=True, started_at=time.time(), ticks=0)
-    _record({"action": "monitor_started", "reason": f"interval {INTERVAL_S}s, floors {MIN_SEVERITY}/{MIN_RISK}"})
-    _thread = threading.Thread(target=_loop, args=(loader,), name="markovathon-monitor", daemon=True)
-    _thread.start()
-    return True
+    if not callable(loader):
+        raise TypeError("monitor loader must be callable")
+    if not math.isfinite(INTERVAL_S) or INTERVAL_S <= 0:
+        raise ValueError("MONITOR_INTERVAL must be finite and greater than zero")
+    if not math.isfinite(MIN_RISK) or not 0 <= MIN_RISK <= 1:
+        raise ValueError("MONITOR_MIN_RISK must be between zero and one")
+    if MIN_SEVERITY.lower() not in SEVERITY_RANK or LOG_LIMIT <= 0:
+        raise ValueError("monitor severity/log limit is invalid")
+    with _lifecycle_lock:
+        if _thread is not None and _thread.is_alive():
+            return False
+        _stop.clear()
+        with _lock:
+            STATE.update(running=True, started_at=time.time(), ticks=0)
+        _record({"action": "monitor_started", "reason": f"interval {INTERVAL_S}s, floors {MIN_SEVERITY}/{MIN_RISK}"})
+        _thread = threading.Thread(target=_loop, args=(loader,), name="markovathon-monitor", daemon=True)
+        _thread.start()
+        return True
 
 
 def stop(timeout: float = 2.0) -> None:
-    _stop.set()
-    if _thread is not None:
-        _thread.join(timeout=timeout)
-    STATE["running"] = False
-    _record({"action": "monitor_stopped", "reason": "requested"})
+    with _lifecycle_lock:
+        _stop.set()
+        if _thread is not None and _thread is not threading.current_thread():
+            _thread.join(timeout=timeout)
+        alive = _thread is not None and _thread.is_alive()
+        with _lock:
+            STATE["running"] = alive
+        if alive:
+            _record({"action": "monitor_stop_requested", "reason": "waiting for current work to finish"})
 
 
 def reset() -> None:
     """Forget what has been seen. The demo reset button."""
+    global _generation
     with _lock:
+        _generation += 1
         _seen.clear()
+        _inflight.clear()
         _log.clear()
-    STATE.update(ticks=0, events_assessed=0, alerts_dispatched=0, below_threshold=0, last_error=None)
+        STATE.update(ticks=0, events_assessed=0, alerts_dispatched=0, below_threshold=0, last_error=None)
 
 
 # --- self-test --------------------------------------------------------------

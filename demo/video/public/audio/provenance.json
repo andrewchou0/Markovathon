@@ -1,0 +1,13 @@
+{
+  "model": "Kokoro-82M v1.0",
+  "voice": "af_heart",
+  "wrapper": "kokoro-onnx 0.6.1",
+  "model_export": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx",
+  "voice_source": "https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md",
+  "model_sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+  "generation": "Local CPU inference; synthetic narration",
+  "captions": "26 phrase captions from model phoneme durations",
+  "clips": 13,
+  "reference_duration_seconds": 120,
+  "sample_rate": 24000
+}

@@ -1,0 +1,8 @@
+SOURCE: backend/data/seed fixtures; in-memory loader; not MongoDB
+DELIVERY: OpenClaw disabled; alerts prepared but not delivered
+BASELINE: 4 assessed, 2 selected, 2 suppressed
++0.105s evt_005 added to fixture loader; no scan invoked
++8.514s timer found evt_005: alert_undelivered
+RESULT: 5 assessed, 3 selected, 2 suppressed, 0 delivered
+TICKS: 2; INTERVAL: 8.0 seconds
+DEDUPLICATION: repeat scan returned []

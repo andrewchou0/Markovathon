@@ -1,0 +1,10 @@
+{
+  "default_event_id": "evt_004",
+  "suppliers_source": "backend/data/seed/suppliers.json",
+  "events_source": "backend/data/seed/events.json",
+  "propagation_source": "backend.agent.propagation.get_affected_suppliers",
+  "narration_source": "backend.agent.narrate deterministic template fallback",
+  "narration_mode": "deterministic",
+  "delivery_connected": false,
+  "rebuild": "python3 frontend/src/fixtures/generate-fixtures.py"
+}

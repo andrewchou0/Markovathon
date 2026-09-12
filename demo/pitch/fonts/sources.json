@@ -1,0 +1,72 @@
+{
+  "retrieved": "2026-09-12",
+  "source_repository": "https://github.com/google/fonts",
+  "files": [
+    {
+      "file": "SairaCondensed-Medium.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sairacondensed/SairaCondensed-Medium.ttf",
+      "bytes": 96240,
+      "sha256": "a02d8fe45b8b7d952cb0dd341683b02ddc1b55dbd0ed89d9d438868be614b66f"
+    },
+    {
+      "file": "SairaCondensed-SemiBold.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sairacondensed/SairaCondensed-SemiBold.ttf",
+      "bytes": 96028,
+      "sha256": "30f8ed4d078211003a9715c80c51ce031bab5c9a17e8771182e4c4599205634b"
+    },
+    {
+      "file": "SairaCondensed-Bold.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sairacondensed/SairaCondensed-Bold.ttf",
+      "bytes": 96428,
+      "sha256": "560297e4bccfb8c6e643095e716b5ea2ea9d7289801ddd79ab901698ffb0dee6"
+    },
+    {
+      "file": "Spectral-Light.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/spectral/Spectral-Light.ttf",
+      "bytes": 269312,
+      "sha256": "a2a530303d326473b69ab7863b879e9203ec747e51d5fa7c7b19e0e975e00740"
+    },
+    {
+      "file": "Spectral-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/spectral/Spectral-Regular.ttf",
+      "bytes": 261088,
+      "sha256": "c89021dc20720c8d0dcf40b0b2f6e00c13665fa8041717f581396f51b8c78f5d"
+    },
+    {
+      "file": "Spectral-Medium.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/spectral/Spectral-Medium.ttf",
+      "bytes": 272920,
+      "sha256": "f385bc588599c879112272711d4acecc126674009d747a27284f59e93a240e83"
+    },
+    {
+      "file": "Spectral-Italic.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/spectral/Spectral-Italic.ttf",
+      "bytes": 270468,
+      "sha256": "7ec97244259db4008c4b1224c7914e5371c797c0044af9d85c2d761ba0e5f787"
+    },
+    {
+      "file": "JetBrainsMono-Variable.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/jetbrainsmono/JetBrainsMono%5Bwght%5D.ttf",
+      "bytes": 187208,
+      "sha256": "48715a42ec242c21e9f02692891e147d022299a52e48d5e413e1a942193ffeda"
+    },
+    {
+      "file": "SairaCondensed-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sairacondensed/OFL.txt",
+      "bytes": 4403,
+      "sha256": "0e2ccc5da1dd979f08ba82bca2fb61592506a1e58d3cbfc26d904f0db71bd812"
+    },
+    {
+      "file": "Spectral-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/spectral/OFL.txt",
+      "bytes": 4392,
+      "sha256": "501d6ceca8e552630fe3aa9442b9a818565680a1a2f79f3fb8c13d6f309a9e98"
+    },
+    {
+      "file": "JetBrainsMono-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/jetbrainsmono/OFL.txt",
+      "bytes": 4399,
+      "sha256": "b2fe5e8987594e9ffd1d2ca52a2f5d73eb8335243893c5d6254b5ad69269591d"
+    }
+  ]
+}

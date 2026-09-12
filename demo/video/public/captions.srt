@@ -1,0 +1,103 @@
+1
+00:00:00,265 --> 00:00:03,265
+Every manufacturer knows its direct suppliers.
+
+2
+00:00:03,265 --> 00:00:05,490
+The dangerous surprises sit deeper:
+
+3
+00:00:05,490 --> 00:00:09,465
+one missing input, three tiers away, can stop the finished product.
+
+4
+00:00:09,465 --> 00:00:11,517
+Markov makes that exposure visible.
+
+5
+00:00:12,419 --> 00:00:18,704
+Start with the supplier records: parts, compliance, locations, and dependencies.
+
+6
+00:00:18,704 --> 00:00:24,404
+Single-source suppliers are marked because a disruption there leaves no recorded alternative.
+
+7
+00:00:24,404 --> 00:00:28,321
+The architecture is designed to keep this sensitive information local.
+
+8
+00:00:30,419 --> 00:00:33,556
+A rare-earth export licence is suspended in Chile.
+
+9
+00:00:35,498 --> 00:00:40,051
+Altiplano is hit directly: single-source and already non-compliant.
+
+10
+00:00:41,219 --> 00:00:43,265
+One tier down, two suppliers.
+
+11
+00:00:44,540 --> 00:00:46,079
+Two tiers down, two more.
+
+12
+00:00:48,040 --> 00:00:50,835
+Three tiers down, the finished powertrain module.
+
+13
+00:00:51,794 --> 00:00:54,155
+The code traces the dependency chain.
+
+14
+00:00:55,394 --> 00:00:59,444
+The monitor checks new disruptions without waiting to be asked.
+
+15
+00:00:59,444 --> 00:01:03,569
+It records routine events and flags those needing attention.
+
+16
+00:01:03,569 --> 00:01:05,679
+Here’s a replay of its local check.
+
+17
+00:01:14,615 --> 00:01:16,719
+Detected. Flagged for approval.
+
+18
+00:01:17,273 --> 00:01:22,348
+The output is a risk summary and an email draft for a person to approve.
+
+19
+00:01:22,348 --> 00:01:25,339
+Response delivery is not connected in this preview.
+
+20
+00:01:28,273 --> 00:01:32,748
+If the model is unavailable, deterministic analysis still works,
+
+21
+00:01:32,748 --> 00:01:34,440
+and templates supply the wording.
+
+22
+00:01:38,473 --> 00:01:40,923
+Knowing the cause is only the start.
+
+23
+00:01:40,923 --> 00:01:44,903
+Combine stock, schedules, orders, and quality records.
+
+24
+00:01:44,903 --> 00:01:48,928
+Protect the priority order, then switch to independent kits.
+
+25
+00:01:48,928 --> 00:01:52,088
+The shortage remains, but production keeps moving.
+
+26
+00:01:52,088 --> 00:01:55,290
+Review the plan and reassess as conditions change.

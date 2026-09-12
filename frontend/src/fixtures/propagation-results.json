@@ -1,0 +1,242 @@
+{
+  "evt_001": {
+    "directly_affected": [
+      "sup_001"
+    ],
+    "cascading_affected": [
+      "sup_002",
+      "sup_003",
+      "sup_004"
+    ],
+    "hop_depth": {
+      "sup_001": 0,
+      "sup_002": 1,
+      "sup_003": 1,
+      "sup_004": 2
+    },
+    "cascade_by_hop": {
+      "1": [
+        "sup_002",
+        "sup_003"
+      ],
+      "2": [
+        "sup_004"
+      ]
+    },
+    "impact_scores": {
+      "sup_001": 0.436,
+      "sup_002": 0.276,
+      "sup_003": 0.163,
+      "sup_004": 0.167
+    },
+    "network_risk_score": 0.715,
+    "single_source_exposed": [
+      "sup_001",
+      "sup_004"
+    ],
+    "ranked_affected": [
+      "sup_001",
+      "sup_002",
+      "sup_004",
+      "sup_003"
+    ],
+    "diagnostics": {
+      "severity_used": "high",
+      "matched_by": {
+        "sup_001": "exact"
+      },
+      "suppliers_indexed": 10,
+      "unresolved_dependents": [],
+      "truncated_at_max_depth": false,
+      "max_depth": 4
+    }
+  },
+  "evt_002": {
+    "directly_affected": [
+      "sup_002"
+    ],
+    "cascading_affected": [
+      "sup_004"
+    ],
+    "hop_depth": {
+      "sup_002": 0,
+      "sup_004": 1
+    },
+    "cascade_by_hop": {
+      "1": [
+        "sup_004"
+      ]
+    },
+    "impact_scores": {
+      "sup_002": 0.276,
+      "sup_004": 0.167
+    },
+    "network_risk_score": 0.397,
+    "single_source_exposed": [
+      "sup_004"
+    ],
+    "ranked_affected": [
+      "sup_002",
+      "sup_004"
+    ],
+    "diagnostics": {
+      "severity_used": "medium",
+      "matched_by": {
+        "sup_002": "exact"
+      },
+      "suppliers_indexed": 10,
+      "unresolved_dependents": [],
+      "truncated_at_max_depth": false,
+      "max_depth": 4
+    }
+  },
+  "evt_003": {
+    "directly_affected": [
+      "sup_010"
+    ],
+    "cascading_affected": [
+      "sup_004"
+    ],
+    "hop_depth": {
+      "sup_010": 0,
+      "sup_004": 1
+    },
+    "cascade_by_hop": {
+      "1": [
+        "sup_004"
+      ]
+    },
+    "impact_scores": {
+      "sup_010": 0.336,
+      "sup_004": 0.167
+    },
+    "network_risk_score": 0.447,
+    "single_source_exposed": [
+      "sup_004"
+    ],
+    "ranked_affected": [
+      "sup_010",
+      "sup_004"
+    ],
+    "diagnostics": {
+      "severity_used": "medium",
+      "matched_by": {
+        "sup_010": "exact"
+      },
+      "suppliers_indexed": 10,
+      "unresolved_dependents": [],
+      "truncated_at_max_depth": false,
+      "max_depth": 4
+    }
+  },
+  "evt_004": {
+    "directly_affected": [
+      "sup_007"
+    ],
+    "cascading_affected": [
+      "sup_005",
+      "sup_008",
+      "sup_002",
+      "sup_006",
+      "sup_004"
+    ],
+    "hop_depth": {
+      "sup_007": 0,
+      "sup_005": 1,
+      "sup_008": 1,
+      "sup_002": 2,
+      "sup_006": 2,
+      "sup_004": 3
+    },
+    "cascade_by_hop": {
+      "1": [
+        "sup_005",
+        "sup_008"
+      ],
+      "2": [
+        "sup_002",
+        "sup_006"
+      ],
+      "3": [
+        "sup_004"
+      ]
+    },
+    "impact_scores": {
+      "sup_007": 0.885,
+      "sup_005": 0.381,
+      "sup_008": 0.179,
+      "sup_002": 0.166,
+      "sup_006": 0.102,
+      "sup_004": 0.1
+    },
+    "network_risk_score": 0.961,
+    "single_source_exposed": [
+      "sup_007",
+      "sup_005",
+      "sup_004"
+    ],
+    "ranked_affected": [
+      "sup_007",
+      "sup_005",
+      "sup_008",
+      "sup_002",
+      "sup_006",
+      "sup_004"
+    ],
+    "diagnostics": {
+      "severity_used": "high",
+      "matched_by": {
+        "sup_007": "exact"
+      },
+      "suppliers_indexed": 10,
+      "unresolved_dependents": [],
+      "truncated_at_max_depth": false,
+      "max_depth": 4
+    }
+  },
+  "evt_005": {
+    "directly_affected": [
+      "sup_009"
+    ],
+    "cascading_affected": [
+      "sup_002",
+      "sup_004"
+    ],
+    "hop_depth": {
+      "sup_009": 0,
+      "sup_002": 1,
+      "sup_004": 1
+    },
+    "cascade_by_hop": {
+      "1": [
+        "sup_002",
+        "sup_004"
+      ]
+    },
+    "impact_scores": {
+      "sup_009": 0.475,
+      "sup_002": 0.276,
+      "sup_004": 0.279
+    },
+    "network_risk_score": 0.726,
+    "single_source_exposed": [
+      "sup_009",
+      "sup_004"
+    ],
+    "ranked_affected": [
+      "sup_009",
+      "sup_004",
+      "sup_002"
+    ],
+    "diagnostics": {
+      "severity_used": "high",
+      "matched_by": {
+        "sup_009": "exact"
+      },
+      "suppliers_indexed": 10,
+      "unresolved_dependents": [],
+      "truncated_at_max_depth": false,
+      "max_depth": 4
+    }
+  }
+}

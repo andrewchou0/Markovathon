@@ -1,0 +1,12 @@
+{
+  "source": "User-provided bombinsound-advertising-traveling-571352.mp3",
+  "original_duration_seconds": 130.246531,
+  "prepared_duration_seconds": 120,
+  "normalized_lufs": -18,
+  "speech_gain": 0.2,
+  "gap_gain": 0.29,
+  "fade_in_seconds": 1.5,
+  "fade_out_seconds": 3,
+  "duck_attack_seconds": 0.25,
+  "duck_release_seconds": 0.7
+}
