@@ -1,0 +1,18 @@
+[
+  {
+    "id": "evt_001",
+    "type": "weather",
+    "description": "Port closure, Gulf Coast, 48hrs — inbound alloy shipments held",
+    "affected_location": "Gulf Coast, LA",
+    "severity": "high",
+    "timestamp": "2026-09-12T14:05:00Z"
+  },
+  {
+    "id": "evt_002",
+    "type": "compliance",
+    "description": "Supplier audit finding: incomplete conflict-minerals filing",
+    "affected_location": "Memphis, TN",
+    "severity": "medium",
+    "timestamp": "2026-09-11T09:30:00Z"
+  }
+]

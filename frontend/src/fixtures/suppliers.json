@@ -1,0 +1,42 @@
+[
+  {
+    "id": "sup_001",
+    "name": "Gulf Precision Castings",
+    "part_supplied": "Turbine housing, cast alloy",
+    "single_source": true,
+    "compliance_status": "compliant",
+    "location": "Gulf Coast, LA",
+    "financial_risk_score": 0.22,
+    "downstream_dependents": ["sup_002", "sup_003"]
+  },
+  {
+    "id": "sup_002",
+    "name": "Delta Assembly Works",
+    "part_supplied": "Turbocharger subassembly",
+    "single_source": false,
+    "compliance_status": "at_risk",
+    "location": "Memphis, TN",
+    "financial_risk_score": 0.61,
+    "downstream_dependents": ["sup_004"]
+  },
+  {
+    "id": "sup_003",
+    "name": "Northline Coatings",
+    "part_supplied": "Thermal barrier coating",
+    "single_source": false,
+    "compliance_status": "compliant",
+    "location": "Toledo, OH",
+    "financial_risk_score": 0.14,
+    "downstream_dependents": []
+  },
+  {
+    "id": "sup_004",
+    "name": "Cascade Final Assembly",
+    "part_supplied": "Finished powertrain module",
+    "single_source": true,
+    "compliance_status": "compliant",
+    "location": "Tacoma, WA",
+    "financial_risk_score": 0.3,
+    "downstream_dependents": []
+  }
+]
