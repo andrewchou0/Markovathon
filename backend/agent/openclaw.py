@@ -108,6 +108,12 @@ class OpenClawUnavailable(RuntimeError):
 # somewhere else as a connection string is.
 LOCAL_HOSTNAMES = {"localhost", "127.0.0.1", "::1", "[::1]"}
 
+# Same narrow escape hatch as narrate.py: the gateway may run on another box you
+# own (a GB10 serving both the model and the gateway, for instance). Name that
+# one host explicitly with OPENCLAW_ALLOW_HOST; never a wildcard, never a hosted
+# endpoint. health() reports it separately from loopback.
+ALLOW_HOST = os.getenv("OPENCLAW_ALLOW_HOST", "").strip().lower()
+
 
 def _hostname(url: str) -> str:
     try:
@@ -116,7 +122,10 @@ def _hostname(url: str) -> str:
         return ""
 
 
-HOST_IS_LOCAL = _hostname(OPENCLAW_HOST) in LOCAL_HOSTNAMES
+OPENCLAW_HOSTNAME = _hostname(OPENCLAW_HOST)
+HOST_IS_LOOPBACK = OPENCLAW_HOSTNAME in LOCAL_HOSTNAMES
+HOST_ALLOWLISTED = bool(ALLOW_HOST) and OPENCLAW_HOSTNAME == ALLOW_HOST
+HOST_IS_LOCAL = HOST_IS_LOOPBACK or HOST_ALLOWLISTED
 
 
 # --- transport --------------------------------------------------------------
@@ -354,6 +363,8 @@ def health() -> dict:
         "enabled": ENABLED,
         "host": OPENCLAW_HOST,
         "host_is_local": HOST_IS_LOCAL,
+        "host_is_loopback": HOST_IS_LOOPBACK,
+        "host_allowlisted": HOST_ALLOWLISTED,
         "agent": OPENCLAW_AGENT,
         "channel": OPENCLAW_CHANNEL,
         "transport": _TRANSPORT,
@@ -442,6 +453,9 @@ if __name__ == "__main__":
     check("guard: localhost is local", _hostname("http://127.0.0.1:18789") in LOCAL_HOSTNAMES)
     check("guard: a remote host is not", _hostname("http://gateway.example.com:18789") not in LOCAL_HOSTNAMES)
     check("guard: malformed url yields no host", _hostname("nonsense") == "")
+    check("guard: loopback reported as loopback", HOST_IS_LOOPBACK == (OPENCLAW_HOSTNAME in LOCAL_HOSTNAMES))
+    check("guard: allowlist is exact-match only", not ALLOW_HOST or HOST_ALLOWLISTED == (OPENCLAW_HOSTNAME == ALLOW_HOST))
+    check("health distinguishes loopback from allowlisted", {"host_is_loopback", "host_allowlisted"} <= set(health()))
 
     # --- disabled by default, and it says so --------------------------------
     check("disabled by default unless OPENCLAW_ENABLE is set", ENABLED is False or os.getenv("OPENCLAW_ENABLE"))

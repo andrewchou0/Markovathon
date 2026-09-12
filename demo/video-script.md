@@ -1,40 +1,58 @@
-# Demo video — script and play-by-play
+# Demo video — script, play-by-play, and criteria mapping
 
-**Target runtime: 3:00.** A 90-second cut is marked with ⚡ on the beats to keep.
+**Runtime: 5:00** (the pitch length in the rubric). A 3:00 cut is marked ⚡.
 
-> **Written by Person 1.** This lives in Person 4's folder because that's where it
-> belongs — `demo/` was empty, so nothing was overwritten. Person 4 owns it from here.
+**Hackathon prompt:** *one day to build an AI agent that runs locally on the box
+(no cloud API) and helps businesses or corporates.*
+
+> Written by Person 1. Lives in `demo/` because that's where it belongs — the folder was
+> empty, so nothing was overwritten. Person 4 owns it from here.
 
 ---
 
-## ⚠️ Read this before you plan the shoot
+## Criteria mapping — every criterion, where it's earned
 
-Two of the four pieces this script films **do not exist yet** (checked at time of
-writing):
+| Criterion | % | Where it's earned | What specifically earns it |
+| --- | --- | --- | --- |
+| **Local-first + always-on** | 30 | **Act 4** (0:00 badge, 2:15 monitor, 3:40 proof) | No cloud LLM call is possible: a non-loopback host is refused before a socket opens. And the agent runs unattended — `monitor.py` wakes on an interval, assesses new events, and escalates without anyone clicking anything. **This is the criterion most demos will miss; give it the most airtime.** |
+| **Business value** | 30 | **Act 1** framing, **Act 7** close | Tier-3 exposure that a buyer cannot see today, found before it becomes a line-down event. Plus measured triage: 5 events assessed, 3 escalated, 2 suppressed — the agent filters its own noise. |
+| **Demo + pitch** | 30 | the whole 5:00 | Clear arc: network → disruption → reasoning → autonomy → approval → proof → value. The staggered cascade in Act 2 is the visual hook. |
+| **Technical execution** | 10 | **Act 3** + **Act 6** | 143 automated checks in the agent core, 77 end-to-end through the real API and MongoDB. Kill the model live and it still returns HTTP 200 in 0.57s. |
+
+**Where the weight actually is:** local-first *and always-on* is 30%, and "the agent acts
+on its own over time" is half of that sentence. Act 4 exists entirely to satisfy it. If
+you have to cut for time, cut Act 5 before Act 4.
+
+---
+
+## ⚠️ State of the build — read before planning the shoot
 
 | Piece | State | Needed for |
 | --- | --- | --- |
-| `backend/agent/` | done, 123 checks green | every beat |
-| `backend/data/` + `backend/api/` | done, 77 integration checks green | every beat |
-| `frontend/` | **empty** | Acts 1–3 (the board, the cascade, the panel) |
-| `demo/` offline hook | **empty** | Act 4 (the badge) |
+| `backend/agent/` | done — 143 checks green, incl. the monitor | every act |
+| `backend/data/` + `backend/api/` | done — 77 integration checks green | every act |
+| `frontend/` | **empty** | Acts 1–3, 5 (board, cascade, panel) |
+| `demo/` offline hook | **empty** | the badge in Acts 1 and 6 |
+| monitor wired into the API | **not yet** — two lines, see below | Act 4 |
 
-So: **Plan A** below is the full film and doubles as a build spec for Persons 3 and 4 —
-every visual is specified tightly enough to implement directly. **Plan B**, at the
-bottom, is a terminal-and-API cut you could record *today* that is still honest and
-still lands the technical story.
+Plan A doubles as a build spec for Persons 3 and 4. **Plan B** at the bottom is a
+terminal cut you could film today with every frame real.
 
-Also unverified, and it affects one line of narration: no real `qwen3.6:35b` call and
-no real OpenClaw gateway have ever been contacted from this repo — neither is installed
-on the dev machine. Both paths are proven against local mocks over real HTTP. **Do not
-say "running Qwen 3.6 35B" on camera until someone has actually run it.** Say what is
-true instead: wording is given in Act 3.
+**Two things nobody should say on camera yet:**
+
+1. **"Running Qwen 3.6 35B."** No real `qwen3.6:35b` call has ever been made from this
+   repo, and no real OpenClaw gateway has been contacted — neither is installed on the
+   dev machine. Both paths are verified against local mocks over real HTTP. Once it runs
+   on the GB10 this becomes true and you should say it. Until then, Act 3 gives wording
+   that is honest.
+2. **"They reply APPROVE and it sends."** Nothing consumes a reply — there's no inbound
+   handler. Say *"drafted for their approval"* and stop.
 
 ---
 
 ## The scenario — locked
 
-**Event `evt_004`** — the only one with a three-hop cascade. Use this one.
+**Event `evt_004`.** The only seeded event with a three-hop cascade.
 
 > *Export licence suspension on rare-earth concentrate, indefinite* — Antofagasta, CL — **HIGH**
 
@@ -47,186 +65,210 @@ true instead: wording is given in Act 3.
 | 2 | Ardennes Wiring Systems | Engine bay wiring harness | — | 0.102 |
 | 3 | **Cascade Final Assembly** | **Finished powertrain module** | single-source | 0.100 |
 
-**Network risk score: 0.961.**
-
-Why this event and not the others: one licence decision in Chile stops the *finished
-product* four tiers away. The chain terminates on the thing the company actually sells.
-That's the whole argument for the product, and it needs no embellishment.
+**Network risk: 0.961.** One licence decision in Chile stops the finished product four
+tiers away. That's the entire business case and it needs no embellishment.
 
 ---
 
-## Pre-flight — run this, in this order
+## Pre-flight
 
 ```bash
 docker start markovathon-mongo || docker run -d --name markovathon-mongo -p 27017:27017 mongo:7
-python -m backend.data.seed                 # idempotent — this is your reset between takes
-python backend/agent/mock_openclaw.py --port 18789 &     # or the real gateway
-env -u OLLAMA_HOST python -m uvicorn backend.api.main:app --port 8000 &
+python -m backend.data.seed        # idempotent — your reset between takes
+python -m backend.agent            # must be ALL GREEN before you roll
+python backend/agent/mock_openclaw.py --port 18789 &   # or the real gateway
+python -m uvicorn backend.api.main:app --port 8000 &
 cd frontend && npm run dev
 ```
 
-- **`printenv OLLAMA_HOST` must be empty.** If it names another machine the agent
-  refuses it and you'll silently film fallback prose.
-- **Re-run the seeder between takes.** Clean board every time, one command.
-- `python -m backend.agent` before you roll: if it isn't green, don't film.
+On the GB10, everything is loopback and nothing extra is needed. If the model lives on
+the GB10 while the API runs elsewhere, set `OLLAMA_ALLOW_HOST=<that hostname>` — it
+permits exactly that one host and `/api/offline-status` reports it as allowlisted rather
+than loopback, so the claim on screen stays accurate.
+
+**`printenv OLLAMA_HOST`** — if it names a box you haven't allowlisted, the agent refuses
+it and you'll film fallback prose without realising.
 
 ---
 
 # PLAN A — the full film
 
-## Act 1 · The network (0:00–0:30) ⚡
+## Act 1 · The problem, in one board (0:00–0:40) ⚡
 
-**On screen.** Dark background (`#0b0d12`). Ten supplier cards in a 5×2 grid, each with
-name, part, and a status dot — green `#3ad19b`, amber `#f5b64f`, red `#ff6b6b`. Cards
-fade in on a 40ms stagger so the board assembles itself rather than appearing. A thin
-amber ring marks the four single-source suppliers. Top-right, a small slate badge:
-**External calls blocked: 0**.
+**Visual.** Dark ground (`#0b0d12`). Ten supplier cards, 5×2, each with name, part and a
+status dot — green `#3ad19b`, amber `#f5b64f`, red `#ff6b6b`. Cards fade in on a 40ms
+stagger so the board assembles itself. A thin amber ring marks the four single-source
+suppliers. Top-right: **External calls blocked: 0**.
 
 **Narration.**
-> "This is a supplier network — ten suppliers, the parts they ship, and their compliance
-> status. Four of them are single-source: if one stops, there's no qualified alternate.
-> Everything you're about to see runs on this laptop. Nothing leaves it."
+> "Every manufacturer knows its direct suppliers. Almost none can see three tiers down —
+> and that's where the failures come from. This is a supplier network: ten suppliers,
+> their parts, their compliance status. Four are single-source, so if one stops there's
+> no qualified alternate. All of this runs on the box in front of you. No cloud, no API
+> keys, nothing leaves the building — which for supplier and compliance data is usually
+> a contractual requirement, not a preference."
 
-**Direction.** Hold the full board for a beat before anything moves. The audience needs
-to read it as *calm* so the disruption has something to break.
+**Direction.** Hold the calm board for a beat before anything moves.
 
 ---
 
-## Act 2 · The disruption (0:30–1:15) ⚡
+## Act 2 · The cascade (0:40–1:30) ⚡
 
-**On screen.** Click the event dropdown → `evt_004`. The event banner slides in from the
-top in amber, then:
+**Visual.** Select `evt_004`. Amber event banner slides in. Then:
 
-1. **Altiplano Rare Earth** pulses red, twice, ~600ms — alone. Its card lifts 4px with a
-   red glow.
-2. **500ms pause.** A line draws from it to two cards; **Shenzhen Micro Sensors** and
-   **Great Lakes Stamping** pulse.
-3. **500ms pause.** Lines extend; **Delta Assembly Works** and **Ardennes Wiring
-   Systems** pulse.
-4. **500ms pause.** One final line; **Cascade Final Assembly** pulses — and a label
-   appears beneath it: *Finished powertrain module*.
-5. A risk gauge counts up, easing out, and stops at **0.961**.
+1. **Altiplano Rare Earth** pulses red twice (~600ms), alone, card lifting 4px with a red glow.
+2. **500ms silence.** A line draws to two cards; **Shenzhen Micro Sensors** and **Great Lakes Stamping** pulse.
+3. **500ms silence.** Lines extend; **Delta Assembly Works** and **Ardennes Wiring Systems** pulse.
+4. **500ms silence.** One final line; **Cascade Final Assembly** pulses, and a label appears: *Finished powertrain module*.
+5. A gauge counts up, easing out, stopping at **0.961**.
 
 **Narration.**
-> "A rare-earth export licence is suspended in Chile. Altiplano is hit directly — and
-> it's single-source and already non-compliant.
+> "A rare-earth export licence is suspended in Chile. Altiplano is hit directly — single
+> source, and already non-compliant.
 > *(pause)* One tier down, two suppliers lose their input.
 > *(pause)* Two tiers down, two more.
-> *(pause)* Three tiers down, the finished powertrain module. One licence decision,
-> four tiers away from the product you actually sell. Network risk: 0.96."
+> *(pause)* Three tiers down: the finished powertrain module. One licence decision, four
+> tiers from the product they sell."
 
-**Direction.** **The pauses are the demo.** Let each hop land in silence before you
-speak the next one. Don't dissolve the connecting lines — leave them, so by the end the
-audience can see the whole propagation path at once. This is the single most important
-shot in the video; shoot it three times and keep the calmest take.
+**Direction.** **The pauses are the demo.** Let each hop land in silence. Leave the
+connecting lines on screen so the full path is visible at the end. Shoot it three times,
+keep the calmest take. This is the hook.
 
-**Why it holds up.** The hop timings aren't theatre — `propagation.py` returns
-`cascade_by_hop` as `{"1": [2 ids], "2": [2 ids], "3": [1 id]}`, so the reveal is
-driven by real computed structure. Worth saying if asked.
-
----
-
-## Act 3 · The reasoning and the draft (1:15–2:10) ⚡
-
-**On screen.** Right-hand panel slides in. The risk summary types out at ~40ms/char (not
-instant — the typing *is* the "it's thinking" signal). Below it, the draft report renders
-in monospace as a real email with `To:` and `Subject:` lines.
-
-**Narration.**
-> "Now the part that has to be reliable: *which* suppliers are affected, and how the
-> risk cascades, is deterministic Python. Not a language model. The model can't name the
-> wrong supplier, because it was never asked which ones were affected.
-> What the model does write is this — the assessment, and a drafted report for a human to
-> approve."
-
-**The honest line about the model.** Until someone has run the real thing, say:
-> "The model runs locally through OpenClaw, with Qwen behind it."
-
-Once verified, upgrade to: *"…Qwen 3.6 35B, on this machine."* **Not before.**
-
-**Direction.** Don't read the summary aloud — let the audience read while you talk over
-it. Reading text on screen aloud is the fastest way to lose a room.
+**If asked whether the timing is theatre:** it isn't — `propagation.py` returns
+`cascade_by_hop` as `{"1": [2], "2": [2], "3": [1]}`, so the reveal is driven by computed
+structure.
 
 ---
 
-## Act 4 · Approval leaves the building (2:10–2:40) ⚡
+## Act 3 · Why it can't lie (1:30–2:15) ⚡
 
-**On screen.** Click **Send for approval**. Then — the money shot — a phone inset slides
-into the lower-right corner and a Slack message arrives: severity headline, affected
-supplier IDs, risk score, cascade depth per hop, the full draft, and the decision
-prompt.
+**Visual.** Right panel slides in. The summary types at ~40ms/char — the typing *is* the
+"thinking" signal. Below it the draft renders in monospace as a real email with `To:` and
+`Subject:`.
 
 **Narration.**
-> "This drafts a report *for human approval* — so it goes to the compliance officer
-> where they already work. That's OpenClaw: it runs locally, and it reaches people in
-> the apps they already use. The draft has left the browser and arrived on a phone, and
-> still nothing has left this machine."
+> "Here's the part that has to be reliable. *Which* suppliers are affected, and how risk
+> cascades, is deterministic Python — not a language model. The model is never asked which
+> suppliers are involved, so it cannot name the wrong one. What it does write is the
+> assessment and a drafted report for a human to approve. The model runs locally through
+> OpenClaw, with Qwen behind it."
 
-**Direction.** Use a real phone on a stand, filmed, or a clean screen mirror. A faked
-mockup will read as faked. If OpenClaw isn't configured against a real channel, **cut
-this act** rather than stage it — Plan B covers the alternative.
-
-**⚠️ Do not say "and they reply APPROVE and it sends."** Nothing consumes a reply yet —
-there's no inbound handler. Say *"for their approval"* and stop there.
+**Direction.** Don't read the on-screen text aloud. Talk over it while they read.
 
 ---
 
-## Act 5 · The proof (2:40–3:00) ⚡
+## Act 4 · It doesn't wait to be asked (2:15–3:00) ⚡ **← 30% lives here**
 
-**On screen.** Zoom the badge: **External calls blocked: 0**. Then, in one motion, kill
-the model process in a visible terminal and click the same event again. The result panel
-fills anyway, in well under a second.
+**Visual.** Switch to an **Agent activity** panel: a live audit trail, newest at top.
+Nobody touches the mouse for the whole act. A timestamped line appears on its own:
+
+```
+16:04:12   evt_002   assessed_no_alert     risk=0.397   network risk 0.397 below 0.5
+16:04:12   evt_003   assessed_no_alert     risk=0.447   network risk 0.447 below 0.5
+16:04:12   evt_005   alert_dispatched      risk=0.726   severity high, network risk 0.726
+```
+
+Then insert a new event into Mongo from a visible terminal — and **without any click**,
+within one interval, a new line appears and an alert fires.
 
 **Narration.**
-> "Zero external calls — enforced, not claimed: any outbound request to a non-local host
-> raises. And when the model goes down mid-demo —" *(kill it)* "— the analysis still
-> completes. The propagation is deterministic, and the narration falls back to
-> templates. This doesn't have a failure mode where it shows you nothing."
+> "Nothing I've shown so far needed me. This agent runs unattended. It wakes on an
+> interval, assesses every event it hasn't seen, and decides on its own which ones a human
+> should actually look at. Two of these five scored below the risk floor — it assessed
+> them, logged why, and left them alone. That matters: an agent that pages you about
+> everything gets muted in a week. And it never alerts twice on the same event.
+> *(insert the event)* I've just added a new disruption to the database. I'm not going to
+> click anything."
+> *(wait — let the silence sit)*
+> "There it is. It found it, scored it, and escalated it."
 
-**Direction.** Rehearse the kill until it's one keystroke. This is the strongest
-engineering beat in the film and it's real: measured at **HTTP 200 in 0.57s** with full
-prose and nothing logged as an error.
+**Direction.** **Do not fill the wait with talking.** The silence while it works
+autonomously is the entire point of the act. Set `MONITOR_INTERVAL=10` for filming so the
+wait is ~10s rather than 30. Rehearse the insert as one paste.
+
+**Wiring needed (Person 2, two lines):** in the API lifespan —
+```python
+from backend.agent import monitor
+monitor.start(lambda: (repository.get_all_events(), repository.get_all_suppliers()))
+```
+plus `GET /api/monitor/status` → `monitor.status()` and `GET /api/monitor/activity` →
+`monitor.activity()` for Person 3 to poll.
+
+---
+
+## Act 5 · Approval reaches a human (3:00–3:40)
+
+**Visual.** The money shot: a phone inset slides into the lower-right and a Slack message
+arrives — severity headline, affected supplier IDs, risk score, cascade depth per hop, the
+full draft, and the decision prompt.
+
+**Narration.**
+> "The agent drafts a report *for human approval*, so it goes where the compliance officer
+> already works. That's OpenClaw — it runs locally and reaches people in the apps they
+> already use. The draft has left the browser and arrived on a phone, and still nothing has
+> left this machine."
+
+**Direction.** Film a real phone or a clean screen mirror. If OpenClaw isn't configured
+against a real channel, **cut this act rather than stage it** — a faked inbox reads as
+faked, and Act 4 already carries the autonomy point.
+
+---
+
+## Act 6 · The proof (3:40–4:20) ⚡
+
+**Visual.** Zoom the badge: **External calls blocked: 0**. Then, in one visible motion,
+kill the model process and re-fire the same event. The panel fills anyway, in well under a
+second.
+
+**Narration.**
+> "Zero external calls — enforced, not claimed. Any outbound request to a non-local host
+> raises, and that counter is the hook doing it. Both the model host and the database URI
+> are verified as local before a socket opens. And when the model dies mid-demo —" *(kill
+> it)* "— the analysis still completes. Propagation is deterministic and the narration falls
+> back to templates. There's no failure mode where this shows you nothing."
+
+**Direction.** Rehearse the kill to one keystroke. Measured: **HTTP 200 in 0.57s**, full
+prose, nothing logged as an error.
+
+---
+
+## Act 7 · What it's worth (4:20–5:00) ⚡
+
+**Visual.** Back to the full board, cascade path still lit, risk gauge at 0.961.
+
+**Narration.**
+> "So: an agent that watches a supplier network on your own hardware, finds the exposure
+> three tiers down that nobody can see today, and puts a drafted response in front of the
+> person who can approve it — before it becomes a line-down event. It filters its own
+> noise, it runs unattended, and it works with the model switched off. For any company
+> whose supplier and compliance data legally cannot go to a cloud model — regulated
+> manufacturing, defence, pharma — that last part isn't a feature. It's the only way they
+> can run this at all."
+
+**Numbers you can defend.** Use these, and **do not invent dollar figures** — one
+follow-up question and an invented number costs more than it earns:
+- 3 tiers of visibility vs. the 1 tier a buyer typically has
+- 5 events assessed, 3 escalated, 2 suppressed — measured, from the seeded set
+- 0.57s end-to-end with the model down
+- 143 + 77 automated checks
 
 ---
 
 # PLAN B — the cut you can film today
 
-No frontend required. Terminal-only, 2:00, and every frame is real.
+No frontend needed. ~2:30, every frame real.
 
-| # | Command | What it shows |
+| # | Command | Shows |
 | --- | --- | --- |
-| 1 | `python -m backend.agent` | 123 checks going green, including "no Mongo `_id` leaked" and the API handoff |
-| 2 | `curl -s localhost:8000/api/suppliers \| jq '.[0]'` | live data out of MongoDB, contract-shaped |
-| 3 | `curl -s -X POST localhost:8000/api/analyze -d '{"event_id":"evt_004"}' \| jq` | the cascade: 1 direct, 5 cascading, 3 hops, and the drafted email |
-| 4 | `python backend/agent/openclaw.py` | the approval message rendered exactly as it would be delivered |
-| 5 | kill the model → re-run step 3 | 200 in 0.57s, prose intact |
+| 1 | `python -m backend.agent` | 143 checks green, incl. the unattended scan |
+| 2 | `python -m backend.agent.monitor` | **the autonomy criterion**: 5 assessed, 3 escalated, 2 suppressed with reasons, dedup on re-scan |
+| 3 | `curl -s localhost:8000/api/suppliers \| jq '.[0]'` | live data from MongoDB, contract-shaped |
+| 4 | `curl -s -X POST localhost:8000/api/analyze -d '{"event_id":"evt_004"}' \| jq` | 1 direct, 5 cascading, 3 hops, drafted email |
+| 5 | `python -m backend.agent.openclaw` | the approval message exactly as delivered |
+| 6 | kill the model → repeat 4 | 200 in 0.57s, prose intact |
 
-Narrate it as *"here's the engine, and here's the proof it doesn't lie"*. Screen-record
-at 1.5× line height with a 16px+ font; tiny terminal text kills more demo videos than
-bad ideas do.
-
----
-
-## Criteria mapping — **TO COMPLETE**
-
-> I don't have the hackathon prompt or rubric. Paste it and I'll fill this in properly:
-> one row per criterion, the timecode that satisfies it, and the exact sentence that
-> earns it. Until then this table is deliberately empty rather than invented.
-
-| Criterion | Beat | Timecode | What earns it |
-| --- | --- | --- | --- |
-| *(pending the prompt)* | | | |
-
-What the current cut demonstrably proves, whatever the rubric turns out to be:
-
-- **Local-first / privacy** — enforced, with a visible counter, and a guard that refuses
-  a non-local host before opening a socket (Act 5)
-- **Sponsor tooling, visibly used** — MongoDB (Act 1 data), OpenClaw as both model
-  harness and approval channel (Acts 3–4), local Qwen behind the gateway
-- **Technical depth** — deterministic multi-hop propagation with cycle protection,
-  scores normalised rather than clamped, 123 + 77 automated checks
-- **Reliability under failure** — the one beat most demos can't do (Act 5)
-- **Real workflow, not a toy** — the output is a draft for a named human to approve
+Record at 16px+ with generous line height. Tiny terminal text kills more demo videos than
+bad ideas.
 
 ---
 
@@ -234,36 +276,43 @@ What the current cut demonstrably proves, whatever the rubric turns out to be:
 
 | Symptom | Do this |
 | --- | --- |
-| Board loads empty | `python -m backend.data.seed` — idempotent, safe mid-demo |
-| Prose looks generic/templated | `printenv OLLAMA_HOST` — a non-local value is refused by design |
-| `/api/analyze` hangs | it can't for longer than the timeouts; check the model process is actually up |
-| Approval doesn't arrive | say "delivery is best-effort and reports honestly" — the response literally carries `delivered: false` and a reason. Then move on |
-| Anything 500s | it shouldn't — but `git stash` nothing, just re-run the seeder and re-click |
+| Board empty | `python -m backend.data.seed` — idempotent, safe mid-demo |
+| Prose looks templated | `printenv OLLAMA_HOST` — an un-allowlisted host is refused by design |
+| Monitor seems idle | `GET /api/monitor/status` shows ticks and uptime; `MONITOR_INTERVAL` may just be 30s |
+| Alert didn't arrive | say "delivery is best-effort and reports honestly" — the response carries `delivered: false` and a reason. Move on |
+| Anything 500s | re-run the seeder, re-click. Don't debug on camera |
 
-**Record a full clean take as a backup the moment one exists.** Live demos fail; a
-recording of a real run is not cheating.
+**Record a clean backup take the moment one exists.** A recording of a real run isn't
+cheating.
 
 ---
 
-## Prepared answers for judges
+## Prepared answers
 
-**"Is it actually offline, or do you just say so?"**
-> Enforced. Outbound HTTP is monkeypatched to raise on any non-local host, and the
-> counter on screen is that hook. The model host and the database URI are both verified
-> to be localhost before a socket opens — we found a dev machine with `OLLAMA_HOST`
-> pointed at another box, which would have silently made it a remote client.
+**"Is it really no-cloud, or do you just say so?"**
+> Enforced. Outbound HTTP is patched to raise on any non-loopback host; the counter on
+> screen is that hook. The model host, gateway and database URI are all verified before a
+> socket opens. We caught a dev machine with `OLLAMA_HOST` pointed at another box, which
+> would have silently made it a remote client. If the model legitimately runs on a separate
+> box you own, that host has to be named explicitly and it's reported as allowlisted, not
+> loopback.
 
-**"How do I know the LLM isn't making up the affected suppliers?"**
-> It can't — it's never asked. `propagation.py` computes the affected set in plain Python
-> and the model only receives the resolved names to write prose about. There's also a
-> gate that rejects generated text naming none of the identified suppliers.
+**"How is this 'always-on' rather than a button?"**
+> `monitor.py` runs in a daemon thread, wakes on an interval, and assesses anything it
+> hasn't seen. It deduplicates, applies a severity and risk floor, and keeps an audit trail
+> of what it ignored and why. Act 4 adds an event to the database without touching the UI
+> and the agent picks it up on its own.
 
-**"Did you test it with the real model?"**
-> Not yet — that's honest. Every path is verified against local mocks over real HTTP, 43
-> checks on the gateway alone, and the deterministic fallback means the demo works either
-> way. *(Don't dress this up. Judges respect a clean "not yet" far more than a hedge that
-> unravels under one follow-up.)*
+**"Couldn't the LLM invent a supplier?"**
+> It's never asked which suppliers are affected — that's deterministic Python. The model
+> only receives resolved names to write prose about, and there's a gate that rejects
+> generated text naming none of the identified suppliers.
 
-**"What happens when a supplier depends on a supplier that depends on it?"**
-> Handled — the cascade is a bounded breadth-first walk with cycle protection, and it
-> records the shortest path to each supplier. There's a test for exactly that.
+**"Did you test with the real model?"**
+> Not yet, and that's honest — every path is verified against local mocks over real HTTP,
+> 43 checks on the gateway alone, and the deterministic fallback means the demo works
+> either way. *(Don't dress this up. A clean "not yet" beats a hedge that unravels.)*
+
+**"What if a supplier depends on one that depends on it?"**
+> Handled — bounded breadth-first walk with cycle protection, recording the shortest path
+> to each supplier. There's a test for exactly that.

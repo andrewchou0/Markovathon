@@ -23,9 +23,12 @@ EXAMPLES = os.path.join(ROOT, "contracts", "examples")
 CONTRACT_KEYS = {"event", "directly_affected", "cascading_affected", "risk_summary", "draft_report"}
 
 
-def run_module_suite(filename: str) -> tuple[bool, str]:
+def run_module_suite(module: str) -> tuple[bool, str]:
+    # Invoked as `-m backend.agent.<module>` rather than as a bare file path:
+    # monitor.py imports its siblings, which only resolves when the package is
+    # the entry point. Works for the dependency-free modules either way.
     proc = subprocess.run(
-        [sys.executable, os.path.join(HERE, filename)],
+        [sys.executable, "-m", f"backend.agent.{module}"],
         capture_output=True,
         text=True,
         cwd=ROOT,
@@ -35,7 +38,7 @@ def run_module_suite(filename: str) -> tuple[bool, str]:
 
 
 def main() -> int:
-    from backend.agent import narrate, openclaw, propagation
+    from backend.agent import monitor, narrate, openclaw, propagation
 
     print("=" * 72)
     print("  backend/agent self-test")
@@ -45,9 +48,9 @@ def main() -> int:
 
     # --- 1. the two module suites -------------------------------------------
     print("\n  module suites")
-    for filename in ("propagation.py", "narrate.py", "openclaw.py"):
-        ok, summary = run_module_suite(filename)
-        print(f"    [{'PASS' if ok else 'FAIL'}] {filename:<16} {summary}")
+    for module in ("propagation", "narrate", "openclaw", "monitor"):
+        ok, summary = run_module_suite(module)
+        print(f"    [{'PASS' if ok else 'FAIL'}] {module + '.py':<16} {summary}")
         failures += 0 if ok else 1
 
     # --- 2. the handoff, wired the way the API will wire it -----------------
@@ -122,6 +125,24 @@ def main() -> int:
         if not ok:
             failures += 1
     print(f"    -> delivered={delivery['delivered']} ({delivery['detail']})")
+
+    # --- 3b. the unattended loop --------------------------------------------
+    print("\n  integration: unattended scan over the seeded events")
+    monitor.reset()
+    actions = monitor.scan_once(events, suppliers)
+    alerted = [a for a in actions if a["action"].startswith("alert")]
+    suppressed = [a for a in actions if a["action"] == "assessed_no_alert"]
+    for label, ok in [
+        ("every event assessed without being asked", len(actions) == len(events)),
+        ("high-risk events selected for a human", len(alerted) >= 1),
+        ("low-risk events suppressed with a reason", len(suppressed) >= 1 and all(a["reason"] for a in suppressed)),
+        ("re-scanning alerts nobody twice", monitor.scan_once(events, suppliers) == []),
+        ("every decision is on the audit trail", len(monitor.activity(100)) == len(events)),
+    ]:
+        print(f"    [{'PASS' if ok else 'FAIL'}] {label}")
+        if not ok:
+            failures += 1
+    print(f"    -> {len(actions)} assessed, {len(alerted)} escalated, {len(suppressed)} suppressed")
 
     # --- 4. what the narration is actually doing right now ------------------
     health = narrate.narration_health()

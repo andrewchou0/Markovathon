@@ -37,6 +37,18 @@ OLLAMA_ENDPOINT = f"{OLLAMA_HOST.rstrip('/')}/api/generate"
 # instead, the same way Person 4 refuses a non-local MONGO_URI.
 LOCAL_HOSTNAMES = {"localhost", "127.0.0.1", "::1", "[::1]"}
 
+# One escape hatch, deliberately narrow. The model may legitimately live on a
+# different box on your own network — a GB10 serving Ollama while the API runs
+# elsewhere is a normal split. That is not a cloud call, but it is also not
+# loopback, so it requires naming the exact host explicitly:
+#
+#     OLLAMA_ALLOW_HOST=gb10.local
+#
+# It allows exactly that one hostname, never a wildcard, and health() reports it
+# separately from loopback so the "fully local" claim is never quietly broader
+# than it looks. Never point this at a hosted inference endpoint.
+ALLOW_HOST = os.getenv("OLLAMA_ALLOW_HOST", "").strip().lower()
+
 
 def _host_of(url: str) -> str:
     from urllib.parse import urlparse
@@ -48,7 +60,9 @@ def _host_of(url: str) -> str:
 
 
 OLLAMA_HOSTNAME = _host_of(OLLAMA_HOST)
-HOST_IS_LOCAL = OLLAMA_HOSTNAME in LOCAL_HOSTNAMES
+HOST_IS_LOOPBACK = OLLAMA_HOSTNAME in LOCAL_HOSTNAMES
+HOST_ALLOWLISTED = bool(ALLOW_HOST) and OLLAMA_HOSTNAME == ALLOW_HOST
+HOST_IS_LOCAL = HOST_IS_LOOPBACK or HOST_ALLOWLISTED
 
 # A 35B model on local hardware is not instant. Connect fast, read patiently.
 CONNECT_TIMEOUT_S = float(os.getenv("OLLAMA_CONNECT_TIMEOUT", "3"))
@@ -155,7 +169,8 @@ def _call_ollama(prompt: str, num_predict: int) -> str:
     if not HOST_IS_LOCAL:
         STATS["last_error"] = (
             f"refusing non-local OLLAMA_HOST {OLLAMA_HOST!r} — this project runs "
-            "entirely on localhost; unset OLLAMA_HOST or point it at localhost:11434"
+            "entirely on-premises; unset OLLAMA_HOST, point it at localhost:11434, or "
+            f"if the model really is on another box you control set OLLAMA_ALLOW_HOST={OLLAMA_HOSTNAME}"
         )
         raise LLMUnavailable(STATS["last_error"])
 
@@ -536,6 +551,8 @@ def narration_health(probe: bool = True) -> dict:
         "model": OLLAMA_MODEL,
         "host": OLLAMA_HOST,
         "host_is_local": HOST_IS_LOCAL,
+        "host_is_loopback": HOST_IS_LOOPBACK,
+        "host_allowlisted": HOST_ALLOWLISTED,
         "transport": _TRANSPORT,
         "disabled": DISABLED,
         "reachable": False,
@@ -617,6 +634,11 @@ if __name__ == "__main__":
 
     # --- the localhost guard ------------------------------------------------
     check("localhost is accepted", _host_of("http://localhost:11434") == "localhost")
+    check("loopback is reported as loopback", HOST_IS_LOOPBACK == (OLLAMA_HOSTNAME in LOCAL_HOSTNAMES))
+    check("an allowlisted host is permitted but not loopback",
+          not HOST_ALLOWLISTED or not HOST_IS_LOOPBACK)
+    check("health distinguishes loopback from allowlisted",
+          {"host_is_loopback", "host_allowlisted"} <= set(narration_health(probe=False)))
     check("loopback ip is accepted", _host_of("http://127.0.0.1:11434") in LOCAL_HOSTNAMES)
     check("a remote hostname is not local", _host_of("http://chimmychonga:11434") not in LOCAL_HOSTNAMES)
     check("a malformed url yields no host", _host_of("not a url") == "")
