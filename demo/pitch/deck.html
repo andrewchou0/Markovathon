@@ -1,0 +1,451 @@
+<title>The Unexecutable Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --ground:#10130f; --surface:#171b15; --surface-2:#1e2319;
+    --ink:#e8eae3; --ink-2:#c3c8ba; --muted:#8d9486; --line:#2b3126;
+    --brass:#c8a04a; --brass-dim:#8e7133; --brass-lift:#e3c483;
+    --oxide:#d4553f; --oxide-dim:#7d2f22;
+    --tier-1:#e3c483; --tier-2:#c8a04a; --tier-3:#9c7a33; --tier-4:#6d5522;
+    --measure:64ch;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:Spectral,Georgia,"Times New Roman",serif; font-weight:300;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display,.eyebrow,.num{font-family:"Saira Condensed","Arial Narrow",Arial,sans-serif;}
+  .mono,.fig,.cite code{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;}
+
+  /* ---- document marking: defense docs carry one, and ours declares the data is fictional ---- */
+  .marking{
+    position:fixed; inset:0 0 auto 0; z-index:20;
+    display:flex; justify-content:center; gap:.6em;
+    padding:6px 16px; background:var(--oxide-dim); color:#f4e6e2;
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; text-align:center; border-bottom:1px solid #93392a;
+  }
+  .marking span{white-space:nowrap;}
+  .marking .sep{color:#d79a8b;}
+
+  .deck{position:relative;}
+  .slide{
+    display:none; min-height:100vh;
+    padding-block:clamp(64px,9vh,104px) clamp(88px,12vh,120px);
+    padding-inline:clamp(16px,5vw,72px);
+  }
+  .slide[data-active="true"]{display:flex; flex-direction:column; justify-content:center;}
+  .inner{width:100%; max-width:1080px; margin-inline:auto;}
+
+  .eyebrow{
+    display:flex; align-items:baseline; gap:.9em; flex-wrap:wrap;
+    margin:0 0 clamp(14px,2.4vh,26px);
+    font-size:12px; font-weight:600; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--brass);
+  }
+  .eyebrow .idx{font-family:"JetBrains Mono",monospace; color:var(--brass-dim); letter-spacing:.1em;}
+  .eyebrow .of{color:var(--muted); font-weight:500; letter-spacing:.14em;}
+
+  h1{
+    margin:0 0 clamp(16px,2.6vh,28px); text-wrap:balance;
+    font-size:clamp(34px,6.2vw,70px); font-weight:700; line-height:.98;
+    letter-spacing:-.01em; text-transform:uppercase;
+  }
+  h2{
+    margin:0 0 clamp(14px,2.2vh,24px); text-wrap:balance;
+    font-size:clamp(27px,4.4vw,50px); font-weight:600; line-height:1.02; text-transform:uppercase;
+  }
+  h1 em,h2 em{font-style:normal; color:var(--brass);}
+  .lede{
+    max-width:var(--measure); margin:0 0 clamp(18px,2.8vh,30px);
+    font-size:clamp(16px,1.9vw,21px); line-height:1.55; color:var(--ink-2);
+  }
+  .lede strong{color:var(--ink); font-weight:500;}
+  p{margin:0 0 .85em; max-width:var(--measure); line-height:1.6;}
+  .kicker{
+    max-width:var(--measure); border-left:2px solid var(--brass); padding-left:16px;
+    font-size:clamp(15px,1.7vw,18px); line-height:1.55; color:var(--ink);
+  }
+
+  /* ---- stat tiles: incommensurable figures stay separate, each with its own source ---- */
+  .tiles{display:grid; gap:2px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); margin-block:clamp(16px,2.6vh,28px);}
+  .tile{background:var(--surface); padding:20px 18px 16px; display:flex; flex-direction:column; gap:6px;}
+  .tile .fig{font-family:"Saira Condensed",sans-serif; font-size:clamp(30px,4vw,44px); font-weight:700; line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums;}
+  .tile.cost .fig{color:var(--oxide);}
+  .tile.count .fig{color:var(--brass-lift);}
+  .tile .what{font-size:14px; line-height:1.45; color:var(--ink-2);}
+  .tile .src{margin-top:auto; padding-top:8px; font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase;}
+
+  /* ---- hero figure: a per-minute rate is one headline, not a chart ---- */
+  .clock{background:var(--surface); border-top:2px solid var(--oxide); padding:clamp(20px,3vw,34px); margin-block:clamp(16px,2.4vh,26px);}
+  .clock .rate{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);}
+  .clock .accrued{
+    font-family:"Saira Condensed",sans-serif; font-weight:700; letter-spacing:-.02em;
+    font-size:clamp(52px,11vw,132px); line-height:.92; color:var(--oxide);
+    font-variant-numeric:tabular-nums; margin:.1em 0 0;
+  }
+  .clock .since{font-size:14px; color:var(--ink-2); margin-top:6px;}
+
+  /* ---- tier ladder: depth is magnitude, so one hue stepped light-to-dark ---- */
+  .ladder{display:flex; flex-direction:column; gap:2px; margin-block:clamp(16px,2.4vh,26px);}
+  .rung{display:grid; grid-template-columns:78px 1fr; align-items:stretch; gap:2px;}
+  .rung .tag{background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.08em; color:var(--ink-2);}
+  .rung .bar{display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:0 4px 4px 0; color:#10130f;}
+  .rung .bar b{font-family:"Saira Condensed",sans-serif; font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;}
+  .rung .bar span{font-size:13px; opacity:.82;}
+  .rung:nth-child(1) .bar{background:var(--tier-1); width:100%;}
+  .rung:nth-child(2) .bar{background:var(--tier-2); width:86%;}
+  .rung:nth-child(3) .bar{background:var(--tier-3); width:66%; color:#f2eee4;}
+  .rung:nth-child(4) .bar{background:var(--tier-4); width:46%; color:#f2eee4;}
+
+  /* ---- two/three column prose ---- */
+  .cols{display:grid; gap:clamp(18px,2.4vw,34px); grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); margin-block:clamp(14px,2.2vh,24px);}
+  .col h3{margin:0 0 8px; font-size:15px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--brass);}
+  .col p{font-size:15px; color:var(--ink-2); max-width:38ch;}
+  .col p:last-child{margin-bottom:0;}
+
+  /* ---- definition block for the category we name ---- */
+  .define{background:var(--surface); padding:clamp(20px,3vw,32px); margin-block:clamp(14px,2.2vh,24px); border-left:3px solid var(--brass);}
+  .define .term{font-family:"Saira Condensed",sans-serif; font-size:clamp(20px,2.6vw,30px); font-weight:700; text-transform:uppercase; letter-spacing:.01em; color:var(--brass-lift); margin-bottom:8px;}
+  .define .body{font-size:clamp(16px,1.9vw,21px); line-height:1.5; max-width:var(--measure); margin:0;}
+
+  /* ---- pipeline ---- */
+  .pipe{display:flex; flex-wrap:wrap; gap:2px; margin-block:clamp(16px,2.4vh,26px);}
+  .stage{flex:1 1 170px; background:var(--surface); padding:16px; display:flex; flex-direction:column; gap:5px; border-top:2px solid var(--brass-dim);}
+  .stage.deterministic{border-top-color:var(--brass-lift);}
+  .stage .n{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.1em; color:var(--muted);}
+  .stage b{font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:500; color:var(--ink);}
+  .stage span{font-size:13px; line-height:1.45; color:var(--ink-2);}
+
+  /* ---- arithmetic, shown so it can be argued with ---- */
+  .calc{background:var(--surface); padding:clamp(18px,2.6vw,28px); margin-block:clamp(14px,2.2vh,24px);}
+  .calc .row{display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:9px 0; border-bottom:1px solid var(--line); font-size:15px;}
+  .calc .row:last-of-type{border-bottom:0;}
+  .calc .row .k{color:var(--ink-2);}
+  .calc .row .v{font-family:"JetBrains Mono",monospace; font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap;}
+  .calc .row.total{border-top:2px solid var(--brass); margin-top:6px; padding-top:14px;}
+  .calc .row.total .k{color:var(--ink); font-weight:500;}
+  .calc .row.total .v{color:var(--brass-lift); font-family:"Saira Condensed",sans-serif; font-size:26px; font-weight:700;}
+  .calc .assume{margin:12px 0 0; font-size:13px; color:var(--muted); max-width:var(--measure);}
+
+  .refuse{border:1px solid var(--oxide-dim); background:#19120f; padding:16px 18px; margin-block:14px;}
+  .refuse b{font-family:"Saira Condensed",sans-serif; text-transform:uppercase; letter-spacing:.06em; color:var(--oxide); display:block; margin-bottom:5px; font-size:14px;}
+  .refuse p{font-size:14px; color:var(--ink-2); margin:0;}
+
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin-block:clamp(14px,2vh,22px);}
+  .chip{background:var(--surface-2); color:var(--ink-2); padding:7px 12px; font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.04em;}
+  .chip b{color:var(--brass-lift); font-weight:500;}
+
+  .cite{margin:clamp(14px,2.2vh,24px) 0 0; padding-top:12px; border-top:1px solid var(--line);
+        font-family:"JetBrains Mono",monospace; font-size:10.5px; line-height:1.7; letter-spacing:.04em;
+        color:var(--muted); text-transform:uppercase; max-width:var(--measure);}
+
+  /* ---- chrome ---- */
+  .chrome{
+    position:fixed; inset:auto 0 0 0; z-index:20;
+    display:flex; align-items:center; gap:clamp(10px,2vw,20px);
+    padding:10px clamp(16px,5vw,72px);
+    background:linear-gradient(to top,var(--ground) 68%,transparent);
+  }
+  .counter{font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.1em; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .counter b{color:var(--brass);}
+  .dots{display:flex; gap:5px; margin-right:auto; flex-wrap:wrap;}
+  .dots button{
+    width:20px; height:4px; padding:0; border:0; cursor:pointer; background:var(--line);
+    transition:background .18s;
+  }
+  .dots button[aria-current="true"]{background:var(--brass);}
+  .dots button:hover{background:var(--brass-dim);}
+  .dots button:focus-visible,.nav button:focus-visible{outline:2px solid var(--brass-lift); outline-offset:3px;}
+  .nav{display:flex; gap:2px;}
+  .nav button{
+    background:var(--surface); color:var(--ink-2); border:0; cursor:pointer;
+    font-family:"JetBrains Mono",monospace; font-size:12px; padding:8px 13px;
+  }
+  .nav button:hover:not(:disabled){background:var(--surface-2); color:var(--ink);}
+  .nav button:disabled{opacity:.35; cursor:default;}
+  .hint{font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.08em; color:var(--line);}
+
+  @media (max-width:640px){
+    .rung{grid-template-columns:60px 1fr;}
+    .rung .bar{width:100%!important; padding:10px 12px; flex-direction:column; align-items:flex-start; gap:2px;}
+    .hint{display:none;}
+    .marking{font-size:9px; letter-spacing:.08em; flex-wrap:wrap;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important; animation:none!important;}
+  }
+</style>
+
+<div class="marking">
+  <span>Unclassified</span><span class="sep">//</span>
+  <span>Illustrative figures</span><span class="sep">//</span>
+  <span>Contains no controlled technical data</span>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 01 -->
+  <section class="slide" data-active="true">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">01</span><span>Why we built this</span><span class="of">/ 10</span></p>
+      <h1>Everyone shipped a cloud agent.<br><em>The people who need one most are not allowed to use it.</em></h1>
+      <p class="lede">This year every useful AI agent became a request to somebody else's datacenter. That is fine if you sell shoes. The American defense industrial base cannot send a supplier list, a part number, or a program schedule to a commercial model &mdash; not as policy, as <strong>law</strong>.</p>
+      <p class="lede">So the organizations carrying the most fragile supply chains in the country were handed exactly none of this decade's tooling. We built the agent they are permitted to run: it never leaves the machine it is installed on.</p>
+      <p class="cite">Governing instruments: DFARS 252.204-7012 &middot; NIST SP 800-171 &middot; CMMC 2.0 &middot; ITAR 22 CFR 120-130</p>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">02</span><span>Naming it properly</span><span class="of">/ 10</span></p>
+      <h2>We do not build for <em>&ldquo;disruptions.&rdquo;</em> A disruption is weather.</h2>
+      <div class="define">
+        <p class="term">Plan-invalidating event</p>
+        <p class="body">Any event that makes the plan you are currently executing impossible to execute as written &mdash; and therefore obliges someone to decide, quickly, what replaces it.</p>
+      </div>
+      <p class="lede">The distinction is not stylistic. &ldquo;Disruption&rdquo; describes a condition in the world. A plan-invalidating event describes a <strong>state change in your obligations</strong>: a schedule you can no longer meet, a delivery you can no longer promise, a clause you are now in breach of.</p>
+      <div class="cols">
+        <div class="col"><h3>The event</h3><p>An export licence is suspended, indefinitely, on a rare-earth concentrate.</p></div>
+        <div class="col"><h3>What it invalidates</h3><p>Not a shipment. The build sequence for every assembly drawing that specifies that magnet billet.</p></div>
+        <div class="col"><h3>Who has to decide</h3><p>A named human, inside hours, with authority to commit &mdash; who must first be told which programs are exposed.</p></div>
+      </div>
+      <p class="cite">None of the three examples we demonstrate are weather. All three stop a plan.</p>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">03</span><span>The market</span><span class="of">/ 10</span></p>
+      <h2>A hundred thousand companies, and the one that stops the program is <em>invisible</em></h2>
+      <div class="tiles">
+        <div class="tile count"><span class="fig">100,000+</span><span class="what">Companies and subcontractors under contract in the defense industrial base.</span><span class="src">CISA, DIB sector</span></div>
+        <div class="tile count"><span class="fig">~300,000</span><span class="what">Companies and suppliers in the broader defense ecosystem.</span><span class="src">DoD CIO</span></div>
+        <div class="tile count"><span class="fig">12,000+</span><span class="what">Small and mid-size subcontractors whose capacities &mdash; sometimes whose identities &mdash; are not well known to DoD.</span><span class="src">Brookings</span></div>
+        <div class="tile count"><span class="fig">51 &rarr; 5</span><span class="what">Aerospace and defense prime contractors, after three decades of consolidation.</span><span class="src">DoD, State of Competition 2022</span></div>
+      </div>
+      <p class="kicker">Read the third tile again. By the Department's own account, thousands of the firms that programs depend on are not reliably identified. You cannot manage exposure through a supplier you cannot name &mdash; and the vendor base shrank from roughly 69,000 firms to 55,000 between 2016 and 2020, so each remaining one carries more.</p>
+      <p class="cite">CISA DIB sector profile &middot; DoD CIO &middot; Brookings, strengthening America's defense industrial base &middot; DoD State of Competition within the Defense Industrial Base, Feb 2022</p>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">04</span><span>The annual bill</span><span class="of">/ 10</span></p>
+      <h2>What a year of unexecutable plans actually costs</h2>
+      <div class="tiles">
+        <div class="tile cost"><span class="fig">$1.4T</span><span class="what">Lost annually to unplanned downtime across the world's 500 largest companies &mdash; <strong>11% of total revenue</strong>, up from 8% in 2019.</span><span class="src">Siemens, 2024</span></div>
+        <div class="tile cost"><span class="fig">$82M</span><span class="what">Average annual losses per company from supply-side events.</span><span class="src">Interos, 2022</span></div>
+        <div class="tile cost"><span class="fig">$184M</span><span class="what">Average lost revenue per year, per large organization.</span><span class="src">Interos</span></div>
+        <div class="tile cost"><span class="fig">$22M</span><span class="what">Average cost of a single event, across surveyed companies.</span><span class="src">Interos</span></div>
+      </div>
+      <div class="cols">
+        <div class="col"><h3>Revenue</h3><p>Deliveries missed inside the quarter they were promised in. On a defense program, that is a milestone payment, not a deferred sale.</p></div>
+        <div class="col"><h3>Labor</h3><p>A stopped line does not stop payroll. Cleared, trained staff stand idle at full cost &mdash; then the recovery is paid again at overtime.</p></div>
+        <div class="col"><h3>Trust</h3><p>Past performance is scored. A subcontractor that surprises a prime twice stops being asked to bid.</p></div>
+      </div>
+      <p class="cite">Figures are separate studies measuring different populations and are deliberately not plotted on one scale. Siemens True Cost of Downtime 2024 &middot; Interos annual supplier-risk research</p>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">05</span><span>The minute</span><span class="of">/ 10</span></p>
+      <h2>A large plant loses <em>$33,000 a minute</em>. The clock starts before anyone knows why.</h2>
+      <div class="clock">
+        <p class="rate">Accruing at $33,000 / minute &mdash; since this slide appeared</p>
+        <p class="accrued" id="accrued">$0</p>
+        <p class="since">One stopped station backs up welding, paint, final assembly, labor and outbound shipping at once. A full plant hour runs to <strong>$2.3 million</strong>.</p>
+      </div>
+      <p class="kicker">Average time to restore production has risen from <strong>49 minutes to 81</strong>. Very little of that is the physical fix. It is the interval spent establishing which suppliers are affected, how far down the chain it reaches, and who has the authority to act. That interval is information work &mdash; and it is the part we remove.</p>
+      <p class="cite">Siemens, True Cost of Downtime 2024. Per-minute figure as reported; the hourly figure implies &asymp;$38,000, so $33,000 is the conservative of the two.</p>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">06</span><span>Why it must be local</span><span class="of">/ 10</span></p>
+      <h2>Sending this to a cloud model is not a privacy preference. It may be an <em>unlicensed export.</em></h2>
+      <div class="cols">
+        <div class="col"><h3>Person-based, not geographic</h3><p>ITAR restricts access by foreign persons regardless of where the server sits. If a provider's infrastructure is operated by or accessible to foreign nationals, sending controlled technical data to it can constitute an export without a licence.</p></div>
+        <div class="col"><h3>&ldquo;US region&rdquo; is not a control</h3><p>A provider subject to foreign government access law creates sovereignty exposure whatever the datacenter's address. Routing CUI through a commercial tool's external servers violates the contract directly.</p></div>
+        <div class="col"><h3>The penalty is personal</h3><p>Up to <strong>$1M per violation</strong>, with criminal liability reaching executives. No procurement officer signs off on that to save an afternoon of analysis.</p></div>
+      </div>
+      <div class="define">
+        <p class="term">And the graph is the secret</p>
+        <p class="body">A supplier network is not metadata about a program. Which firm machines which part, sole-sourced, for which assembly &mdash; that <em>is</em> the program, described from the bottom up. An adversary who wants to know what you are building, and where to press, would ask for exactly this file.</p>
+      </div>
+      <p class="cite">ITAR 22 CFR 120-130 &middot; DFARS 252.204-7012 &middot; NIST SP 800-171 &middot; CMMC 2.0 &middot; CUI enclave guidance</p>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">07</span><span>What we built</span><span class="of">/ 10</span></p>
+      <h2>An agent that watches the network, traces the exposure, and drafts the response &mdash; on one box</h2>
+      <div class="cols">
+        <div class="col"><h3>It watches</h3><p>Unattended. It wakes on a timer, assesses every event it has not seen, and escalates only what clears a severity and risk floor &mdash; logging what it ignored, and why.</p></div>
+        <div class="col"><h3>It traces</h3><p>Three tiers deep through the dependency graph, naming the sole-source firms in the path and scoring the exposure of each.</p></div>
+        <div class="col"><h3>It drafts</h3><p>A written assessment and a response email addressed to the reviewer who can approve it. Nothing is ever sent without a human.</p></div>
+      </div>
+      <div class="chips">
+        <span class="chip">exposure traced in <b>0.57s</b> with the model switched off</span>
+        <span class="chip"><b>3</b> tiers of visibility</span>
+        <span class="chip"><b>220</b> automated checks</span>
+        <span class="chip">external calls made: <b>0</b></span>
+      </div>
+      <p class="kicker">It has no failure mode that shows you nothing. Exposure is computed deterministically, so if the language model is unavailable the assessment still arrives &mdash; written by template, correct, and clearly marked as such.</p>
+      <p class="cite">Figures measured on the delivered build, not projected.</p>
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">08</span><span>How it works</span><span class="of">/ 10</span></p>
+      <h2>The model writes. It never decides <em>who is affected.</em></h2>
+      <div class="pipe">
+        <div class="stage"><span class="n">01 &middot; local</span><b>MongoDB</b><span>Suppliers, parts, sole-source flags, the dependency graph. Loopback only; a hosted URI is refused at startup.</span></div>
+        <div class="stage deterministic"><span class="n">02 &middot; deterministic</span><b>propagation.py</b><span>Who is hit and how far it cascades. Plain Python, cycle-safe, same answer every run. No model involved.</span></div>
+        <div class="stage"><span class="n">03 &middot; local</span><b>Qwen via OpenClaw</b><span>Given the resolved names, writes the assessment and the draft. It is never asked which suppliers matter.</span></div>
+        <div class="stage"><span class="n">04 &middot; human</span><b>Approval</b><span>Delivered to the reviewer in the channel they already use. Unsent until a person says so.</span></div>
+      </div>
+      <p class="lede">That split is the whole safety argument: a model cannot name the wrong supplier if it was never asked to choose one. A generated sentence that mentions none of the identified firms is rejected before anyone reads it.</p>
+      <div class="ladder">
+        <div class="rung"><span class="tag">tier 0</span><span class="bar"><b>Altiplano Rare Earth</b><span>neodymium magnet billet &middot; sole source &middot; non-compliant</span></span></div>
+        <div class="rung"><span class="tag">tier 1</span><span class="bar"><b>2 suppliers</b><span>sensor array &middot; mounting bracket</span></span></div>
+        <div class="rung"><span class="tag">tier 2</span><span class="bar"><b>2 suppliers</b><span>turbocharger subassembly &middot; wiring harness</span></span></div>
+        <div class="rung"><span class="tag">tier 3</span><span class="bar"><b>Finished powertrain module</b><span>the deliverable</span></span></div>
+      </div>
+      <p class="cite">Worked example from the running system: one licence suspension, six firms exposed, network risk 0.961 &mdash; four tiers from the product that ships.</p>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">09</span><span>What it saves</span><span class="of">/ 10</span></p>
+      <h2>We do not shorten the repair. We shorten the distance between the event and the <em>decision.</em></h2>
+      <div class="calc">
+        <div class="row"><span class="k">Rate while the plan is unexecutable</span><span class="v">$33,000 / min</span></div>
+        <div class="row"><span class="k">Restoration window today, average</span><span class="v">81 min</span></div>
+        <div class="row"><span class="k">Decision latency we remove &mdash; assumed, ~12% of the window</span><span class="v">10 min</span></div>
+        <div class="row total"><span class="k">Avoided, per plan-invalidating event</span><span class="v">$330,000</span></div>
+        <p class="assume">Every input is on this slide so you can argue with the assumption rather than the total. Change the 10 minutes to 3 and it is $99,000. A single mid-size subcontractor seeing twelve such events a year, at ten minutes each, is $4.0M.</p>
+      </div>
+      <div class="refuse">
+        <b>What we will not put on this slide</b>
+        <p>A national savings headline. The only defensible per-minute figure we can source is for a large plant; multiplying it across 12,000 small subcontractors would be arithmetic theatre, and you would be right to dismiss the rest of the deck for it. The macro anchor that <em>is</em> sourced: 11% of revenue, up from 8% in five years.</p>
+      </div>
+      <p class="kicker">The national return is not only money. On a defense program the same event costs schedule &mdash; and schedule slip on a fielded capability is measured in readiness, not dollars. That is the argument we would make to a programme office, and it does not require us to invent a number.</p>
+      <p class="cite">Rate and window: Siemens 2024. Revenue share: Siemens 2024. Per-event totals are modeled from those two inputs and labeled as such.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow"><span class="idx">10</span><span>Beyond defense</span><span class="of">/ 10</span></p>
+      <h2>Three conditions. Wherever all three hold, this is the <em>same product.</em></h2>
+      <div class="cols">
+        <div class="col"><h3>01 &middot; A dependency graph</h3><p>Things depend on things, more than one layer deep, and nobody can hold the whole graph in their head.</p></div>
+        <div class="col"><h3>02 &middot; Events that invalidate plans</h3><p>Something happens that makes the standing plan unexecutable, and a human must choose the replacement quickly.</p></div>
+        <div class="col"><h3>03 &middot; Data that cannot leave</h3><p>Law, contract, or plain commercial sense forbids sending the graph to a third party's model.</p></div>
+      </div>
+      <div class="chips">
+        <span class="chip"><b>Pharmaceutical</b> &middot; GxP, validated supply, sole-source APIs</span>
+        <span class="chip"><b>Semiconductor</b> &middot; tool chains, allocation, export control</span>
+        <span class="chip"><b>Energy</b> &middot; grid assets, long-lead transformers</span>
+        <span class="chip"><b>Hospital systems</b> &middot; PHI, single-source consumables</span>
+        <span class="chip"><b>Banking</b> &middot; vendor concentration under regulation</span>
+      </div>
+      <p class="lede">Defense is where the constraint is sharpest, which is why we built it there first. The architecture does not soften anywhere else &mdash; it simply stops being mandatory and starts being an advantage.</p>
+      <p class="kicker">Ask: give us the stage, and we will run it live &mdash; insert an event into the database, touch nothing, and let the agent find it while you watch.</p>
+      <p class="cite">Built in one day, on one box, with no cloud API call at any point.</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="chrome">
+  <p class="counter">SLIDE <b id="cur">01</b> / 10</p>
+  <div class="dots" id="dots" role="tablist" aria-label="Slides"></div>
+  <p class="hint">&larr; &rarr; or SPACE</p>
+  <div class="nav">
+    <button id="prev" type="button" aria-label="Previous slide">PREV</button>
+    <button id="next" type="button" aria-label="Next slide">NEXT</button>
+  </div>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dots = document.getElementById('dots');
+  const cur = document.getElementById('cur');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const pad = (n) => String(n + 1).padStart(2, '0');
+  let at = 0;
+
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'dot-' + i;
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-label', 'Slide ' + pad(i));
+    b.addEventListener('click', () => show(i));
+    dots.append(b);
+  });
+
+  // The per-minute rate is the point of slide 05, so it accrues while you look at it.
+  const RATE_PER_SEC = 33000 / 60;
+  const accrued = document.getElementById('accrued');
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  let clockFrom = 0, clockTimer = null;
+
+  function stopClock() { clearInterval(clockTimer); clockTimer = null; }
+
+  function startClock() {
+    stopClock();
+    if (still) { accrued.textContent = money.format(RATE_PER_SEC * 30) + ' in 30 seconds'; return; }
+    clockFrom = Date.now();
+    accrued.textContent = money.format(0);
+    clockTimer = setInterval(() => {
+      accrued.textContent = money.format(((Date.now() - clockFrom) / 1000) * RATE_PER_SEC);
+    }, 100);
+  }
+
+  function show(i) {
+    at = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, n) => {
+      const on = n === at;
+      s.dataset.active = String(on);
+      dots.children[n].setAttribute('aria-current', String(on));
+    });
+    cur.textContent = pad(at);
+    prevBtn.disabled = at === 0;
+    nextBtn.disabled = at === slides.length - 1;
+    window.scrollTo(0, 0);
+    if (at === 4) startClock(); else stopClock();
+  }
+
+  prevBtn.addEventListener('click', () => show(at - 1));
+  nextBtn.addEventListener('click', () => show(at + 1));
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); show(at + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); show(at - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+
+  show(0);
+</script>
