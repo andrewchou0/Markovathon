@@ -3,3 +3,6 @@ dist/
 .env.local
 *.log
 .qa/
+
+# pnpm is this project's package manager; pnpm-lock.yaml is the lockfile.
+package-lock.json
