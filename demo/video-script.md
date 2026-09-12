@@ -52,9 +52,19 @@ does it work and where does the data come from" inside a 2-minute budget.**
 | --- | --- |
 | `backend/agent/` (incl. `monitor.py`) | done — 143 checks green |
 | `backend/data/` + `backend/api/` | done — 77 integration checks green |
-| `frontend/` | **empty** — beats 2, 3, 5 need it |
-| offline badge hook | **empty** |
-| monitor wired into API | **two lines** — see beat 4 |
+| `frontend/` | **in, and wired to the live API** — 17 tests green, verified in Chrome |
+| monitor wired into API | **done** — starts with the app, `/api/monitor/*` live |
+| offline badge hook | **still empty** — the badge reports `enforced: false` until Person 4's hook lands |
+
+**Film in live mode: `http://127.0.0.1:5173/?demo=0`.** That reads the real database, so
+all 10 suppliers and all 5 events are available and `evt_004` gives a genuine three-tier
+reveal. Demo mode (`?demo=1`) is a separate scripted walkthrough with its own 4-supplier
+sample set — good, but it only covers `evt_001`/`evt_002` and cannot show the deep cascade.
+
+**Do not film with `mock_openclaw.py` running.** Its canned prose is event-agnostic, so
+the assessment will describe a Gulf Coast port closure while the screen shows a Chilean
+export licence. Either run the real model, or run with **no model at all** — the
+deterministic narrator is event-accurate and will name Altiplano correctly.
 
 **Never say these two things:**
 1. *"Running Qwen 3.6 35B"* — no real call has been made from this repo; not installed on
@@ -70,9 +80,9 @@ does it work and where does the data come from" inside a 2-minute budget.**
 | | |
 | --- | --- |
 | Canvas | 1920×1080, 60fps, screen capture — no webcam |
-| Ground | `#0b0d12`; panels `#151922`; hairlines `#262c3a` |
-| Text | `#eceef4`; muted `#8b94a8`; **18px minimum**, 15px never |
-| Status | green `#3ad19b` · amber `#f5b64f` · red `#ff6b6b` · accent `#7aa9ff` |
+| Ground | `#f5f7fa`; surfaces `#fff`; hairlines `#dce3ed` — the UI is **light**, don't grade it dark |
+| Text | ink `#203047`; muted `#596779`. Zoom the browser to 110–125% so type reads on a phone |
+| Accent | primary `#285bd0`; danger `#b33b34` (direct disruption); amber (cascading exposure) |
 | Motion | 240ms ease-out for entrances; 600ms pulse; never linear |
 | Captions | bottom-left chip, `#151922` at 92%, 22px, 240ms fade, on screen ≥2.5s |
 | Cursor | hide it except when clicking. Jittery cursors read as amateur |
@@ -89,9 +99,11 @@ docker start markovathon-mongo || docker run -d --name markovathon-mongo -p 2701
 python -m backend.data.seed         # idempotent — your reset between takes
 python -m backend.agent             # must be ALL GREEN or don't roll
 MONITOR_INTERVAL=8 python -m uvicorn backend.api.main:app --port 8000 &
-python backend/agent/mock_openclaw.py --port 18789 &
-cd frontend && npm run dev
+cd frontend && npm install && npm run dev     # then open ?demo=0
 ```
+
+Use `npm`, not `pnpm`. Do **not** start `mock_openclaw.py` for a take — see the warning
+above about event-agnostic canned prose.
 
 `MONITOR_INTERVAL=8` for filming so beat 4's wait is ~8s, not 30. `printenv OLLAMA_HOST`
 must be empty or allowlisted, or you'll film fallback prose without knowing.
@@ -104,7 +116,7 @@ must be empty or allowlisted, or you'll film fallback prose without knowing.
 
 | | |
 | --- | --- |
-| **On screen** | Cold open, no title card. The board assembles itself: 10 supplier cards, 5×2, fading in on a 40ms stagger. Rail dim. |
+| **On screen** | Cold open, no title card. Live mode, scrolled to the supplier network: 10 cards from MongoDB. |
 | **Caption** | `Supplier network · running entirely on local hardware` |
 | **Narration (29w)** | "Every manufacturer knows its direct suppliers. Almost none can see three tiers down. That's where the failures come from — and where this agent looks, entirely on your own hardware." |
 
@@ -117,7 +129,7 @@ a title.
 
 | | |
 | --- | --- |
-| **On screen** | Status dots resolve green/amber/red. Amber rings appear on the four single-source cards. **Rail: MongoDB lights.** At 0:22, a small terminal inset (bottom-right, 2s) shows the real response scrolling: `curl -s localhost:8000/api/suppliers \| jq '.[0]'` |
+| **On screen** | Scroll up to the Live workspace. The **Pipeline** panel on the right is the built-in version of the rail — `MongoDB` already ticked. At 0:22, a 2s terminal inset (bottom-right) shows `curl -s localhost:8000/api/suppliers \| jq '.[0]'` returning the same data. |
 | **Caption** | `10 suppliers · live from local MongoDB · no cloud, no API keys` |
 | **Narration (39w)** | "Ten suppliers, live from a local MongoDB. Parts, compliance status, and who depends on whom. Four are single-source: if one stops, there's no alternate. No cloud, no API keys — supplier data like this usually can't legally leave the building." |
 
@@ -130,7 +142,7 @@ reading a database rather than a hardcoded array. Don't skip it and don't narrat
 
 | | |
 | --- | --- |
-| **On screen** | Select `evt_004`; amber banner slides in. Then, **with silence between each step**: ① Altiplano pulses red twice, alone, card lifting 4px. ② *500ms* — line draws to two cards, both pulse. ③ *500ms* — lines extend, two more pulse. ④ *500ms* — final line; **Cascade Final Assembly** pulses and labels itself *Finished powertrain module*. ⑤ Gauge eases up to **0.961**. **Rail: propagation.py lights at ①.** Lines stay on screen. |
+| **On screen** | Select *Export licence suspension on rare-earth concentrate* (`evt_004`) and press **Run analysis**. The caption reads `Tier N of 3 revealed` as it goes. Then, **with silence between each step**: ① Altiplano pulses red twice, alone, card lifting 4px. ② *500ms* — line draws to two cards, both pulse. ③ *500ms* — lines extend, two more pulse. ④ *500ms* — final line; **Cascade Final Assembly** pulses and labels itself *Finished powertrain module*. ⑤ Gauge eases up to **0.961**. The **Pipeline** panel ticks `propagation.py`. Each card gains a "Direct disruption" or "Cascading exposure" label as it lands. |
 | **Caption** | `deterministic Python — the model is never asked which suppliers are affected` then `network risk 0.961 · 3 tiers · 6 suppliers` |
 | **Narration (45w)** | "A rare-earth export licence is suspended in Chile. Altiplano is hit directly — single-source, already non-compliant. *(pause)* One tier down, two suppliers lose their input. *(pause)* Two tiers down, two more. *(pause)* Three tiers down: the finished powertrain module. One licence decision, four tiers from the product they sell." |
 
@@ -147,7 +159,7 @@ the reveal timing is computed structure.
 
 | | |
 | --- | --- |
-| **On screen** | Cut to the **Agent activity** panel — a live audit trail, newest on top. **Hide the cursor for this entire beat.** Three timestamped rows are already there: two `assessed_no_alert` with reasons, one `alert_dispatched`. Then a visible terminal inset pastes one `mongosh` insert. Nobody clicks anything. ~8s later a new row appears on its own and the rail's approval box lights. |
+| **On screen** | Scroll to the **Agent activity** panel at the bottom of live mode. It shows `Running unattended · scanning every Ns`, the counters `5 assessed / 3 escalated / 2 suppressed`, and the audit trail with a reason per row. **Hide the cursor for this entire beat.** Then a visible terminal inset pastes one `mongosh` insert. Nobody clicks anything. Within one interval a new row appears on its own. |
 | **Caption** | `unattended · wakes on a timer` then `5 assessed · 3 escalated · 2 suppressed — it filters its own noise` |
 | **Narration (45w)** | "Nothing so far needed me. It also runs unattended — waking on a timer, scoring new events, escalating only what matters. Two of five scored below the floor; it logged why and moved on. I'll add a disruption now and touch nothing." *(let the wait sit in silence)* "Found it. Escalated it." |
 
@@ -155,12 +167,9 @@ the reveal timing is computed structure.
 software works on its own is the most persuasive thing in the video. If you're over
 runtime, take the second from beat 6 — not this one.
 
-**Wiring (Person 2, two lines) in the API lifespan:**
-```python
-from backend.agent import monitor
-monitor.start(lambda: (repository.get_all_events(), repository.get_all_suppliers()))
-```
-plus `GET /api/monitor/activity` → `monitor.activity()` for Person 3 to poll.
+**Wiring: done.** The monitor starts with the API and `/api/monitor/status` +
+`/api/monitor/activity` are live; the Agent activity panel polls them every 3s. Set
+`MONITOR_INTERVAL=8` when filming so the wait is ~8s rather than 30.
 
 ---
 
@@ -168,7 +177,7 @@ plus `GET /api/monitor/activity` → `monitor.activity()` for Person 3 to poll.
 
 | | |
 | --- | --- |
-| **On screen** | Split: left, the risk summary types at 40ms/char and the draft renders as a real email with `To:`/`Subject:`. **Rail: Qwen-via-OpenClaw lights.** Right, a phone inset slides in and the Slack message lands. Then jump-cut to a terminal, kill the model process, re-fire the event — panel refills in under a second. **Rail: model box greys out, everything else still lights.** |
+| **On screen** | Split: left, the risk summary types at 40ms/char and the draft renders as a real email with `To:`/`Subject:`. The **Pipeline** panel ticks `local model`. Right, a phone inset slides in and the Slack message lands. Then jump-cut to a terminal, kill the model, press **Run again** — the panel refills in under a second. |
 | **Caption** | `drafted for human approval — nothing sent` then `model killed · HTTP 200 in 0.57s` |
 | **Narration (45w)** | "The draft goes to the compliance officer where they already work — through OpenClaw, running locally. And zero external calls isn't a claim: any non-local request raises. Kill the model mid-demo —" *(kill it)* "— and the analysis still completes. The propagation is deterministic; the wording falls back to templates." |
 

@@ -31,7 +31,19 @@ async def lifespan(_app: FastAPI):
     print(f"MongoDB OK at {MONGO_URI}")
     if propagation is None:
         print("WARNING: backend/agent/ not importable — /api/analyze will 503")
+
+    # Always-on monitoring. The loader is injected so backend/agent/ keeps
+    # knowing nothing about storage. Added by Person 1 — the unattended loop is
+    # what makes this an agent rather than an endpoint.
+    if monitor is not None:
+        monitor.start(lambda: (repository.get_all_events(), repository.get_all_suppliers()))
+        print(f"monitor started — every {monitor.INTERVAL_S}s, "
+              f"floors {monitor.MIN_SEVERITY}/{monitor.MIN_RISK}")
+
     yield
+
+    if monitor is not None:
+        monitor.stop()
 
 
 app = FastAPI(title="Supply Chain Disruption & Compliance Agent", lifespan=lifespan)
@@ -50,9 +62,9 @@ app.add_middleware(
 # Guarded import so this layer runs and is testable before backend/agent/ lands.
 # Once Person 1 commits those files this picks them up with no change here.
 try:
-    from backend.agent import narrate, propagation
+    from backend.agent import monitor, narrate, propagation
 except ImportError:  # pragma: no cover - transitional
-    narrate = propagation = None
+    monitor = narrate = propagation = None
 
 
 def _require_agent():
@@ -142,9 +154,42 @@ def draft(body: DraftRequest) -> dict:
     }
 
 
+@app.get("/api/monitor/status")
+def monitor_status() -> dict:
+    """Is the unattended loop alive, and what has it done?"""
+    if monitor is None:
+        raise HTTPException(status_code=503, detail="backend/agent/monitor.py is not available.")
+    return monitor.status()
+
+
+@app.get("/api/monitor/activity")
+def monitor_activity(limit: int = 25) -> list[dict]:
+    """The loop's audit trail, newest first — including what it chose to ignore."""
+    if monitor is None:
+        raise HTTPException(status_code=503, detail="backend/agent/monitor.py is not available.")
+    return monitor.activity(limit=max(1, min(limit, 200)))
+
+
 @app.get("/api/offline-status")
 def offline_status() -> dict:
-    # Person 4 owns this body. Documented default until offline_guard lands.
+    # Person 4 owns this body; their hook takes precedence when it lands.
     if offline_guard is not None:
         return offline_guard.offline_status()
-    return {"external_calls_blocked": 0, "mode": "fully offline"}
+
+    # Until then, report what we can actually verify rather than a bare stub.
+    # probe=False keeps this cheap enough for the header to poll: no sockets.
+    health = narrate.narration_health(probe=False) if narrate is not None else {}
+    return {
+        "external_calls_blocked": 0,
+        "mode": "fully offline",
+        # No outbound hook is installed yet, so this is not enforcement — say so.
+        "enforced": False,
+        "llm": {
+            "host": health.get("host"),
+            "model": health.get("model"),
+            "host_is_loopback": health.get("host_is_loopback"),
+            "host_allowlisted": health.get("host_allowlisted"),
+            "mode": health.get("mode"),
+        },
+        "db": {"host": MONGO_URI},
+    }

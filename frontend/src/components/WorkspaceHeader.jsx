@@ -1,6 +1,18 @@
+import { useEffect, useState } from 'react';
 import Icon from './Icon.jsx';
 
-export default function WorkspaceHeader({ demoMode, onToggle }) {
+export default function WorkspaceHeader({ demoMode, onToggle, client }) {
+  // In live mode these readings come from the backend's own enforcement hook,
+  // not from this component's assumptions.
+  const [local, setLocal] = useState(null);
+  useEffect(() => {
+    if (demoMode || !client) { setLocal(null); return; }
+    let live = true;
+    const read = () => client.offlineStatus().then((value) => { if (live) setLocal(value); }).catch(() => { if (live) setLocal(null); });
+    read();
+    const handle = setInterval(read, 5000);
+    return () => { live = false; clearInterval(handle); };
+  }, [demoMode, client]);
   return (
     <header className="topbar">
       <a className="brand" href="#main-content" aria-label="Markov overview">
@@ -18,13 +30,13 @@ export default function WorkspaceHeader({ demoMode, onToggle }) {
           <summary aria-label="Local status"><Icon name="shield" size={17} /><span>Local status</span></summary>
           <div className="status-popover">
             <strong>Local services</strong>
-            <p>{demoMode ? 'Demo mode uses sample data. These service readings are placeholders.' : 'The live workspace is not connected yet.'}</p>
+            <p>{demoMode ? 'Demo mode uses sample data. These service readings are placeholders.' : local ? 'Reported by the backend\u2019s own outbound-request hook.' : 'Waiting for the local API.'}</p>
             <dl>
-              <div><dt>External calls blocked</dt><dd>{demoMode ? '0 (sample)' : 'Unknown'}</dd></div>
-              <div><dt>Model host</dt><dd>Not connected</dd></div>
-              <div><dt>Database host</dt><dd>Not connected</dd></div>
+              <div><dt>External calls blocked</dt><dd>{demoMode ? '0 (sample)' : local ? String(local.external_calls_blocked) : 'Unknown'}</dd></div>
+              <div><dt>Model host</dt><dd>{local?.llm?.host ?? 'Not connected'}</dd></div>
+              <div><dt>Database host</dt><dd>{local?.db?.host ?? 'Not connected'}</dd></div>
             </dl>
-            <span className="status-unverified"><Icon name="info" size={14} />Offline enforcement is not yet verified.</span>
+            <span className={local?.enforced ? 'status-verified' : 'status-unverified'}><Icon name={local?.enforced ? 'shield' : 'info'} size={14} />{local?.enforced ? 'Outbound requests to non-local hosts are refused.' : 'Offline enforcement is not yet verified.'}</span>
           </div>
         </details>
       </div>
