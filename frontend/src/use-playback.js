@@ -32,5 +32,5 @@ export default function usePlayback(frames) {
   function start() { setCursor(0); setPlaying(true); }
   function reset() { clearTimeout(timer.current); setPlaying(false); setCursor(-1); }
   function next() { clearTimeout(timer.current); setPlaying(false); setCursor(value => Math.min(value + 1, last)); }
-  return { cursor, playing, complete, start, reset, next, pause: () => setPlaying(false), toggle: () => setPlaying(value => !value) };
+  return { cursor, playing, complete, start, reset, next, finish: () => { clearTimeout(timer.current); setPlaying(false); setCursor(last); }, pause: () => setPlaying(false), toggle: () => setPlaying(value => !value) };
 }

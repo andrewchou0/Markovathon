@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "eventId": "evt_004",
+  "simulated": true,
+  "label": "Simulated operational records for an Altiplano disruption response",
+  "currency": "USD",
+  "planningHour": 0,
+  "wms": {
+    "recordId": "SIM-WMS-001",
+    "sensorArrays": {
+      "partId": "SENSOR-ARRAY",
+      "physicalUnits": 200,
+      "qualityHoldUnits": 40,
+      "allocatedUnits": 0
+    },
+    "finishedPowertrain": {
+      "partId": "FINISHED-POWERTRAIN",
+      "physicalUnits": 40,
+      "qualityHoldUnits": 0,
+      "allocatedUnits": 0
+    },
+    "kitInputs": [
+      { "partId": "SERVICE-HOUSING", "physicalUnits": 160, "qualityHoldUnits": 0, "allocatedUnits": 0 },
+      { "partId": "SERVICE-FASTENER", "physicalUnits": 640, "qualityHoldUnits": 0, "allocatedUnits": 0 }
+    ],
+    "committedIncomingSensorUnits": 0
+  },
+  "mes": {
+    "recordId": "SIM-MES-001",
+    "horizonHours": 40,
+    "powertrainUnitsPerHour": 20,
+    "sensorsPerPowertrain": 1,
+    "currentSequence": ["standard", "priority", "kits"],
+    "prioritySequence": ["priority", "standard", "kits"],
+    "releasePolicy": "strict_queue",
+    "releasePolicyDescription": "The next queued job cannot be released until the preceding module job is complete. A component-short module job parks the line and keeps the independent kit job queued.",
+    "serviceKits": {
+      "unitsPerHour": 10,
+      "changeoverHours": 2,
+      "changeoverCost": 600,
+      "bomApproved": true,
+      "qualifiedCrewAvailable": true,
+      "affectedMaterialIds": ["SENSOR-ARRAY", "RARE-EARTH-BILLET"],
+      "bom": [
+        { "partId": "SERVICE-HOUSING", "unitsPerKit": 1 },
+        { "partId": "SERVICE-FASTENER", "unitsPerKit": 4 }
+      ]
+    }
+  },
+  "orders": {
+    "recordId": "SIM-ORDERS-001",
+    "items": [
+      { "id": "priority", "customer": "Priority customer", "label": "Priority powertrain order", "product": "powertrain", "quantity": 180, "dueHour": 16, "lateFeePerUnit": 150 },
+      { "id": "standard", "customer": "Standard customer", "label": "Standard powertrain order", "product": "powertrain", "quantity": 180, "dueHour": 40, "lateFeePerUnit": 25 },
+      { "id": "kits", "customer": "Service customer", "label": "Service-kit order", "product": "serviceKit", "quantity": 160, "dueHour": 40, "lateFeePerUnit": 10 }
+    ],
+    "feeRule": "For this simulated comparison, apply the stated one-time fee to each unit not delivered by its due hour. These are illustrative contract terms, not actual customer liabilities."
+  },
+  "qualityAlternate": {
+    "recordId": "SIM-QUALITY-001",
+    "heldSensorDisposition": "The 40 quality-held sensor arrays are not released and cannot be consumed by any option.",
+    "alternateQualificationWorkingDays": 15,
+    "scheduledHoursPerWorkingDay": 8,
+    "alternateQualified": false,
+    "alternateReceiptCommitted": false,
+    "alternateNote": "Qualification alone does not promise delivery. No sensor receipt or expedited shipment from the alternate is committed within the planning horizon."
+  }
+}

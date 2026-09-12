@@ -1,0 +1,403 @@
+{
+  "suppliers": [
+    {
+      "id": "sup_001",
+      "name": "Gulf Precision Castings",
+      "part_supplied": "Turbine housing, cast alloy",
+      "single_source": true,
+      "compliance_status": "compliant",
+      "location": "Gulf Coast, LA",
+      "financial_risk_score": 0.22,
+      "downstream_dependents": [
+        "sup_002",
+        "sup_003"
+      ]
+    },
+    {
+      "id": "sup_002",
+      "name": "Delta Assembly Works",
+      "part_supplied": "Turbocharger subassembly",
+      "single_source": false,
+      "compliance_status": "at_risk",
+      "location": "Memphis, TN",
+      "financial_risk_score": 0.61,
+      "downstream_dependents": [
+        "sup_004"
+      ]
+    },
+    {
+      "id": "sup_003",
+      "name": "Northline Coatings",
+      "part_supplied": "Thermal barrier coating",
+      "single_source": false,
+      "compliance_status": "compliant",
+      "location": "Toledo, OH",
+      "financial_risk_score": 0.14,
+      "downstream_dependents": []
+    },
+    {
+      "id": "sup_004",
+      "name": "Cascade Final Assembly",
+      "part_supplied": "Finished powertrain module",
+      "single_source": true,
+      "compliance_status": "compliant",
+      "location": "Tacoma, WA",
+      "financial_risk_score": 0.3,
+      "downstream_dependents": []
+    },
+    {
+      "id": "sup_005",
+      "name": "Shenzhen Micro Sensors",
+      "part_supplied": "Manifold pressure sensor array",
+      "single_source": true,
+      "compliance_status": "at_risk",
+      "location": "Shenzhen, CN",
+      "financial_risk_score": 0.48,
+      "downstream_dependents": [
+        "sup_002",
+        "sup_006"
+      ]
+    },
+    {
+      "id": "sup_006",
+      "name": "Ardennes Wiring Systems",
+      "part_supplied": "Engine bay wiring harness",
+      "single_source": false,
+      "compliance_status": "compliant",
+      "location": "Liege, BE",
+      "financial_risk_score": 0.19,
+      "downstream_dependents": [
+        "sup_004"
+      ]
+    },
+    {
+      "id": "sup_007",
+      "name": "Altiplano Rare Earth",
+      "part_supplied": "Neodymium magnet billet",
+      "single_source": true,
+      "compliance_status": "non_compliant",
+      "location": "Antofagasta, CL",
+      "financial_risk_score": 0.77,
+      "downstream_dependents": [
+        "sup_005",
+        "sup_008"
+      ]
+    },
+    {
+      "id": "sup_008",
+      "name": "Great Lakes Stamping",
+      "part_supplied": "Stamped steel mounting bracket",
+      "single_source": false,
+      "compliance_status": "compliant",
+      "location": "Erie, PA",
+      "financial_risk_score": 0.25,
+      "downstream_dependents": [
+        "sup_002"
+      ]
+    },
+    {
+      "id": "sup_009",
+      "name": "Kanto Precision Bearings",
+      "part_supplied": "High-speed bearing set",
+      "single_source": true,
+      "compliance_status": "compliant",
+      "location": "Nagoya, JP",
+      "financial_risk_score": 0.33,
+      "downstream_dependents": [
+        "sup_002",
+        "sup_004"
+      ]
+    },
+    {
+      "id": "sup_010",
+      "name": "Piedmont Circuit Labs",
+      "part_supplied": "ECU control board",
+      "single_source": false,
+      "compliance_status": "non_compliant",
+      "location": "Greensboro, NC",
+      "financial_risk_score": 0.68,
+      "downstream_dependents": [
+        "sup_004"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_001",
+      "type": "weather",
+      "description": "Port closure, Gulf Coast, 48hrs \u2014 inbound alloy shipments held",
+      "affected_location": "Gulf Coast, LA",
+      "severity": "high",
+      "timestamp": "2026-09-12T14:05:00Z"
+    },
+    {
+      "id": "evt_002",
+      "type": "compliance",
+      "description": "Supplier audit finding: incomplete conflict-minerals filing",
+      "affected_location": "Memphis, TN",
+      "severity": "medium",
+      "timestamp": "2026-09-11T09:30:00Z"
+    },
+    {
+      "id": "evt_003",
+      "type": "financial",
+      "description": "Credit downgrade \u2014 supplier placed on negative watch after missed covenant",
+      "affected_location": "Greensboro, NC",
+      "severity": "medium",
+      "timestamp": "2026-09-10T16:45:00Z"
+    },
+    {
+      "id": "evt_004",
+      "type": "geopolitical",
+      "description": "Export licence suspension on rare-earth concentrate, indefinite",
+      "affected_location": "Antofagasta, CL",
+      "severity": "high",
+      "timestamp": "2026-09-09T07:15:00Z"
+    },
+    {
+      "id": "evt_005",
+      "type": "weather",
+      "description": "Typhoon landfall halts outbound freight, 72hrs",
+      "affected_location": "Nagoya, JP",
+      "severity": "high",
+      "timestamp": "2026-09-08T22:00:00Z"
+    }
+  ],
+  "supplier_count": 10,
+  "single_source_ids": [
+    "sup_001",
+    "sup_004",
+    "sup_005",
+    "sup_007",
+    "sup_009"
+  ],
+  "risk": {
+    "directly_affected": [
+      "sup_007"
+    ],
+    "cascading_affected": [
+      "sup_005",
+      "sup_008",
+      "sup_002",
+      "sup_006",
+      "sup_004"
+    ],
+    "hop_depth": {
+      "sup_007": 0,
+      "sup_005": 1,
+      "sup_008": 1,
+      "sup_002": 2,
+      "sup_006": 2,
+      "sup_004": 3
+    },
+    "cascade_by_hop": {
+      "1": [
+        "sup_005",
+        "sup_008"
+      ],
+      "2": [
+        "sup_002",
+        "sup_006"
+      ],
+      "3": [
+        "sup_004"
+      ]
+    },
+    "impact_scores": {
+      "sup_007": 0.885,
+      "sup_005": 0.381,
+      "sup_008": 0.179,
+      "sup_002": 0.166,
+      "sup_006": 0.102,
+      "sup_004": 0.1
+    },
+    "network_risk_score": 0.961,
+    "single_source_exposed": [
+      "sup_007",
+      "sup_005",
+      "sup_004"
+    ],
+    "ranked_affected": [
+      "sup_007",
+      "sup_005",
+      "sup_008",
+      "sup_002",
+      "sup_006",
+      "sup_004"
+    ],
+    "diagnostics": {
+      "severity_used": "high",
+      "matched_by": {
+        "sup_007": "exact"
+      },
+      "suppliers_indexed": 10,
+      "unresolved_dependents": [],
+      "truncated_at_max_depth": false,
+      "max_depth": 4
+    }
+  },
+  "analysis": {
+    "event": {
+      "id": "evt_004",
+      "type": "geopolitical",
+      "description": "Export licence suspension on rare-earth concentrate, indefinite",
+      "affected_location": "Antofagasta, CL",
+      "severity": "high",
+      "timestamp": "2026-09-09T07:15:00Z"
+    },
+    "directly_affected": [
+      "sup_007"
+    ],
+    "cascading_affected": [
+      "sup_005",
+      "sup_008",
+      "sup_002",
+      "sup_006",
+      "sup_004"
+    ],
+    "risk_summary": "A high-severity geopolitical event (\u201cExport licence suspension on rare-earth concentrate, indefinite\u201d) has disrupted Altiplano Rare Earth (Neodymium magnet billet), a single-source supplier with no qualified alternate. The disruption propagates to 5 downstream suppliers: Shenzhen Micro Sensors (Manifold pressure sensor array), Great Lakes Stamping (Stamped steel mounting bracket), Delta Assembly Works (Turbocharger subassembly), and 2 more. Principal concerns are 3 single-source dependencies in the affected path and 3 suppliers already flagged on compliance.",
+    "draft_report": "To: Compliance Contact\nSubject: Supply disruption \u2014 Export licence suspension on rare-earth concentrate, indefinite \u2014 action required\n\nA high-severity geopolitical event has been detected affecting Antofagasta, CL.\n\nDirectly affected:\n  - Altiplano Rare Earth (Neodymium magnet billet)\n\nDownstream exposure:\n  - Shenzhen Micro Sensors (Manifold pressure sensor array)\n  - Great Lakes Stamping (Stamped steel mounting bracket)\n  - Delta Assembly Works (Turbocharger subassembly)\n  - Ardennes Wiring Systems (Engine bay wiring harness)\n  - Cascade Final Assembly (Finished powertrain module)\n\nRecommended next steps:\n  1. Confirm on-hand inventory and committed orders for each part listed above.\n  2. Begin qualification review for an alternate source where the affected supplier is single-source.\n  3. Review the compliance status of the flagged suppliers before the next filing window.\n  4. Re-assess once the disruption window closes.\n\nThis draft was prepared automatically for human review and has not been sent."
+  },
+  "fallback_seconds": 0.5334,
+  "fallback_timing_scope": "direct Python propagation + summary + draft calls; no HTTP API, no running model",
+  "health": {
+    "model": "qwen3.6:35b",
+    "host": "http://127.0.0.1:11434",
+    "host_is_local": true,
+    "host_is_loopback": true,
+    "host_allowlisted": false,
+    "transport": "urllib",
+    "disabled": false,
+    "reachable": false,
+    "model_present": false,
+    "mode": "deterministic",
+    "stats": {
+      "llm_calls": 4,
+      "llm_failures": 4,
+      "harness_fallbacks": 0,
+      "fallbacks_used": 2,
+      "last_mode": "deterministic",
+      "last_latency_s": null,
+      "last_error": "URLError: <urlopen error [Errno 61] Connection refused>"
+    },
+    "openclaw": {
+      "enabled": false,
+      "host": "http://127.0.0.1:18789",
+      "host_is_local": true,
+      "host_is_loopback": true,
+      "host_allowlisted": false,
+      "agent": "openclaw/default",
+      "channel": "slack",
+      "transport": "urllib",
+      "authenticated": false,
+      "reachable": false,
+      "harness_available": false,
+      "message_tool": null,
+      "stats": {
+        "harness_calls": 0,
+        "harness_failures": 0,
+        "approvals_sent": 0,
+        "approvals_failed": 0,
+        "message_tool": null,
+        "last_latency_s": null,
+        "last_error": null
+      },
+      "detail": "disabled (set OPENCLAW_ENABLE=1)"
+    },
+    "error": "URLError: <urlopen error [Errno 61] Connection refused>"
+  },
+  "monitor": {
+    "status": {
+      "running": false,
+      "ticks": 0,
+      "events_assessed": 5,
+      "alerts_dispatched": 0,
+      "below_threshold": 2,
+      "started_at": null,
+      "last_tick_at": null,
+      "last_error": null,
+      "interval_s": 30.0,
+      "min_severity": "medium",
+      "min_risk": 0.5,
+      "events_seen": 5,
+      "uptime_s": 0
+    },
+    "activity": [
+      {
+        "event_id": "evt_005",
+        "action": "alert_undelivered",
+        "reason": "severity high, network risk 0.726",
+        "network_risk_score": 0.726,
+        "affected": 3,
+        "narration_mode": "deterministic",
+        "delivery": {
+          "delivered": false,
+          "detail": "OpenClaw disabled (set OPENCLAW_ENABLE=1)",
+          "channel": "slack"
+        },
+        "at": "2026-09-12T17:39:17+00:00"
+      },
+      {
+        "event_id": "evt_004",
+        "action": "alert_undelivered",
+        "reason": "severity high, network risk 0.961",
+        "network_risk_score": 0.961,
+        "affected": 6,
+        "narration_mode": "deterministic",
+        "delivery": {
+          "delivered": false,
+          "detail": "OpenClaw disabled (set OPENCLAW_ENABLE=1)",
+          "channel": "slack"
+        },
+        "at": "2026-09-12T17:39:16+00:00"
+      },
+      {
+        "event_id": "evt_003",
+        "action": "assessed_no_alert",
+        "reason": "network risk 0.447 below 0.5",
+        "network_risk_score": 0.447,
+        "affected": 2,
+        "at": "2026-09-12T17:39:16+00:00"
+      },
+      {
+        "event_id": "evt_002",
+        "action": "assessed_no_alert",
+        "reason": "network risk 0.397 below 0.5",
+        "network_risk_score": 0.397,
+        "affected": 2,
+        "at": "2026-09-12T17:39:16+00:00"
+      },
+      {
+        "event_id": "evt_001",
+        "action": "alert_undelivered",
+        "reason": "severity high, network risk 0.715",
+        "network_risk_score": 0.715,
+        "affected": 4,
+        "narration_mode": "deterministic",
+        "delivery": {
+          "delivered": false,
+          "detail": "OpenClaw disabled (set OPENCLAW_ENABLE=1)",
+          "channel": "slack"
+        },
+        "at": "2026-09-12T17:39:16+00:00"
+      }
+    ],
+    "second_scan": [],
+    "threshold_selected": 3,
+    "dispatched": 0
+  },
+  "ports": {
+    "8000": "ConnectionRefusedError: [Errno 61] Connection refused",
+    "11434": "ConnectionRefusedError: [Errno 61] Connection refused",
+    "18789": "ConnectionRefusedError: [Errno 61] Connection refused",
+    "27017": "ConnectionRefusedError: [Errno 61] Connection refused"
+  },
+  "python": "3.12.10 (v3.12.10:0cc81280367, Apr  8 2025, 08:46:59) [Clang 13.0.0 (clang-1300.0.29.30)]",
+  "dependencies": {
+    "httpx": false,
+    "fastapi": false,
+    "pymongo": false,
+    "uvicorn": false
+  },
+  "offline_guard_exists": false
+}

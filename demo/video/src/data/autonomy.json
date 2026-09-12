@@ -1,0 +1,86 @@
+{
+  "source": "real daemon-thread monitor, in-memory seeded fixture loader; no MongoDB/API/gateway/model",
+  "insert_seconds": 0.105,
+  "discovery_seconds": 8.514,
+  "status": {
+    "running": true,
+    "ticks": 2,
+    "events_assessed": 5,
+    "alerts_dispatched": 0,
+    "below_threshold": 2,
+    "started_at": 1789234831.421566,
+    "last_tick_at": "2026-09-12T17:40:39+00:00",
+    "last_error": null,
+    "interval_s": 8.0,
+    "min_severity": "medium",
+    "min_risk": 0.5,
+    "events_seen": 5,
+    "uptime_s": 8.5
+  },
+  "activity": [
+    {
+      "event_id": "evt_005",
+      "action": "alert_undelivered",
+      "reason": "severity high, network risk 0.726",
+      "network_risk_score": 0.726,
+      "affected": 3,
+      "narration_mode": "deterministic",
+      "delivery": {
+        "delivered": false,
+        "detail": "OpenClaw disabled (set OPENCLAW_ENABLE=1)",
+        "channel": "slack"
+      },
+      "at": "2026-09-12T17:40:39+00:00"
+    },
+    {
+      "action": "monitor_started",
+      "reason": "interval 8.0s, floors medium/0.5",
+      "at": "2026-09-12T17:40:31+00:00"
+    },
+    {
+      "event_id": "evt_004",
+      "action": "alert_undelivered",
+      "reason": "severity high, network risk 0.961",
+      "network_risk_score": 0.961,
+      "affected": 6,
+      "narration_mode": "deterministic",
+      "delivery": {
+        "delivered": false,
+        "detail": "OpenClaw disabled (set OPENCLAW_ENABLE=1)",
+        "channel": "slack"
+      },
+      "at": "2026-09-12T17:40:31+00:00"
+    },
+    {
+      "event_id": "evt_003",
+      "action": "assessed_no_alert",
+      "reason": "network risk 0.447 below 0.5",
+      "network_risk_score": 0.447,
+      "affected": 2,
+      "at": "2026-09-12T17:40:30+00:00"
+    },
+    {
+      "event_id": "evt_002",
+      "action": "assessed_no_alert",
+      "reason": "network risk 0.397 below 0.5",
+      "network_risk_score": 0.397,
+      "affected": 2,
+      "at": "2026-09-12T17:40:30+00:00"
+    },
+    {
+      "event_id": "evt_001",
+      "action": "alert_undelivered",
+      "reason": "severity high, network risk 0.715",
+      "network_risk_score": 0.715,
+      "affected": 4,
+      "narration_mode": "deterministic",
+      "delivery": {
+        "delivered": false,
+        "detail": "OpenClaw disabled (set OPENCLAW_ENABLE=1)",
+        "channel": "slack"
+      },
+      "at": "2026-09-12T17:40:30+00:00"
+    }
+  ],
+  "rescan": []
+}

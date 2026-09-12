@@ -1,0 +1,184 @@
+[
+  {
+    "text": "Every manufacturer knows its direct suppliers.",
+    "startMs": 265.333,
+    "endMs": 3265.333,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "The dangerous surprises sit deeper:",
+    "startMs": 3265.333,
+    "endMs": 5490.333,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "one missing input, three tiers away, can stop the finished product.",
+    "startMs": 5490.333,
+    "endMs": 9465.333,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Markov makes that exposure visible.",
+    "startMs": 9465.333,
+    "endMs": 11517.333,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Start with the supplier records: parts, compliance, locations, and dependencies.",
+    "startMs": 12419.0,
+    "endMs": 18704.0,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Single-source suppliers are marked because a disruption there leaves no recorded alternative.",
+    "startMs": 18704.0,
+    "endMs": 24404.0,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "The architecture is designed to keep this sensitive information local.",
+    "startMs": 24404.0,
+    "endMs": 28320.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "A rare-earth export licence is suspended in Chile.",
+    "startMs": 30419.0,
+    "endMs": 33556.0,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Altiplano is hit directly: single-source and already non-compliant.",
+    "startMs": 35497.667,
+    "endMs": 40051.333,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "One tier down, two suppliers.",
+    "startMs": 41219.0,
+    "endMs": 43265.333,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Two tiers down, two more.",
+    "startMs": 44540.333,
+    "endMs": 46078.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Three tiers down, the finished powertrain module.",
+    "startMs": 48040.333,
+    "endMs": 50834.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "The code traces the dependency chain.",
+    "startMs": 51794.0,
+    "endMs": 54155.333,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "The monitor checks new disruptions without waiting to be asked.",
+    "startMs": 55394.0,
+    "endMs": 59444.0,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "It records routine events and flags those needing attention.",
+    "startMs": 59444.0,
+    "endMs": 63569.0,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Here’s a replay of its local check.",
+    "startMs": 63569.0,
+    "endMs": 65678.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Detected. Flagged for approval.",
+    "startMs": 74615.333,
+    "endMs": 76718.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "The output is a risk summary and an email draft for a person to approve.",
+    "startMs": 77272.667,
+    "endMs": 82347.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Response delivery is not connected in this preview.",
+    "startMs": 82347.667,
+    "endMs": 85338.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "If the model is unavailable, deterministic analysis still works,",
+    "startMs": 88272.667,
+    "endMs": 92747.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "and templates supply the wording.",
+    "startMs": 92747.667,
+    "endMs": 94440.0,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Knowing the cause is only the start.",
+    "startMs": 98472.667,
+    "endMs": 100922.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Combine stock, schedules, orders, and quality records.",
+    "startMs": 100922.667,
+    "endMs": 104902.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Protect the priority order, then switch to independent kits.",
+    "startMs": 104902.667,
+    "endMs": 108927.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "The shortage remains, but production keeps moving.",
+    "startMs": 108927.667,
+    "endMs": 112087.667,
+    "timestampMs": null,
+    "confidence": null
+  },
+  {
+    "text": "Review the plan and reassess as conditions change.",
+    "startMs": 112087.667,
+    "endMs": 115290.0,
+    "timestampMs": null,
+    "confidence": null
+  }
+]

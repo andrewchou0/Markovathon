@@ -1,0 +1,21 @@
+{
+  "eventId": "evt_004",
+  "simulated": true,
+  "source": "frontend/src/fixtures/operations-scenario.json",
+  "evaluator": "frontend/src/operations-demo.js",
+  "scope": "Simulated browser planning comparison; no live backend mitigation or Qwen capability is claimed.",
+  "horizonHours": 40,
+  "baselineCost": 25600,
+  "recommendedCost": 4600,
+  "costReduction": 21000,
+  "productiveHoursRecovered": 16,
+  "priorityOnTime": 180,
+  "priorityDemand": 180,
+  "standardLate": 160,
+  "finishedModulesForPriority": 40,
+  "sensorsForPriority": 140,
+  "kitsBuilt": 160,
+  "changeoverHours": 2,
+  "workEndsHour": 26,
+  "standardModulesBuilt": 20
+}

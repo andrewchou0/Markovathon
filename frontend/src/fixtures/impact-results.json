@@ -1,0 +1,57 @@
+{
+  "evt_001": {
+    "eventId": "evt_001",
+    "networkRiskScore": 0.715,
+    "directCount": 1,
+    "cascadingCount": 3,
+    "affectedCount": 4,
+    "tierCount": 2,
+    "singleSourceCount": 2,
+    "flaggedComplianceCount": 1,
+    "scope": "Recorded deterministic exposure; not a probability, downtime estimate, or financial loss."
+  },
+  "evt_002": {
+    "eventId": "evt_002",
+    "networkRiskScore": 0.397,
+    "directCount": 1,
+    "cascadingCount": 1,
+    "affectedCount": 2,
+    "tierCount": 1,
+    "singleSourceCount": 1,
+    "flaggedComplianceCount": 1,
+    "scope": "Recorded deterministic exposure; not a probability, downtime estimate, or financial loss."
+  },
+  "evt_003": {
+    "eventId": "evt_003",
+    "networkRiskScore": 0.447,
+    "directCount": 1,
+    "cascadingCount": 1,
+    "affectedCount": 2,
+    "tierCount": 1,
+    "singleSourceCount": 1,
+    "flaggedComplianceCount": 1,
+    "scope": "Recorded deterministic exposure; not a probability, downtime estimate, or financial loss."
+  },
+  "evt_004": {
+    "eventId": "evt_004",
+    "networkRiskScore": 0.961,
+    "directCount": 1,
+    "cascadingCount": 5,
+    "affectedCount": 6,
+    "tierCount": 3,
+    "singleSourceCount": 3,
+    "flaggedComplianceCount": 3,
+    "scope": "Recorded deterministic exposure; not a probability, downtime estimate, or financial loss."
+  },
+  "evt_005": {
+    "eventId": "evt_005",
+    "networkRiskScore": 0.726,
+    "directCount": 1,
+    "cascadingCount": 2,
+    "affectedCount": 3,
+    "tierCount": 1,
+    "singleSourceCount": 2,
+    "flaggedComplianceCount": 1,
+    "scope": "Recorded deterministic exposure; not a probability, downtime estimate, or financial loss."
+  }
+}

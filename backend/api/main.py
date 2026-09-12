@@ -12,10 +12,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+from pymongo.errors import PyMongoError
+from starlette.concurrency import run_in_threadpool
 
+from backend.api.models import AnalyzeRequest, DraftRequest
 from backend.data import repository
-from backend.data.db import MONGO_URI, ping
+from backend.data.db import MONGO_ADDRESS, ping
 
 
 @asynccontextmanager
@@ -27,8 +30,8 @@ async def lifespan(_app: FastAPI):
         offline_guard.install()
 
     # Fail loudly here rather than hanging on the first request.
-    ping()
-    print(f"MongoDB OK at {MONGO_URI}")
+    await run_in_threadpool(ping)
+    print(f"MongoDB OK at {MONGO_ADDRESS}")
     if propagation is None:
         print("WARNING: backend/agent/ not importable — /api/analyze will 503")
 
@@ -40,10 +43,11 @@ async def lifespan(_app: FastAPI):
         print(f"monitor started — every {monitor.INTERVAL_S}s, "
               f"floors {monitor.MIN_SEVERITY}/{monitor.MIN_RISK}")
 
-    yield
-
-    if monitor is not None:
-        monitor.stop()
+    try:
+        yield
+    finally:
+        if monitor is not None:
+            await run_in_threadpool(monitor.stop)
 
 
 app = FastAPI(title="Supply Chain Disruption & Compliance Agent", lifespan=lifespan)
@@ -84,12 +88,10 @@ except ImportError:  # pragma: no cover - transitional
     offline_guard = None
 
 
-class AnalyzeRequest(BaseModel):
-    event_id: str
-
-
-class DraftRequest(BaseModel):
-    analysis_result: dict
+@app.exception_handler(PyMongoError)
+async def storage_unavailable(_request, _exc):
+    # A database outage after startup is a recoverable dependency failure.
+    return JSONResponse(status_code=503, content={"detail": "Local MongoDB is unavailable. Retry when it is running."})
 
 
 @app.get("/api/suppliers")
@@ -135,21 +137,19 @@ def draft(body: DraftRequest) -> dict:
     """Regenerate just the draft, without recomputing propagation."""
     _require_agent()
 
-    result = body.analysis_result
-    missing = [
-        k for k in ("event", "directly_affected", "cascading_affected") if k not in result
-    ]
-    if missing:
-        raise HTTPException(
-            status_code=422, detail=f"analysis_result missing keys: {missing}"
-        )
+    result = body.analysis_result.model_dump()
+    suppliers = repository.get_all_suppliers()
+    known = {supplier["id"] for supplier in suppliers}
+    unknown = set(result["directly_affected"] + result["cascading_affected"]) - known
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"Unknown affected supplier ids: {sorted(unknown)}")
 
     return {
         "draft_report": narrate.generate_draft_report(
             result["event"],
             result["directly_affected"],
             result["cascading_affected"],
-            repository.get_all_suppliers(),
+            suppliers,
         )
     }
 
@@ -181,7 +181,7 @@ def offline_status() -> dict:
     health = narrate.narration_health(probe=False) if narrate is not None else {}
     return {
         "external_calls_blocked": 0,
-        "mode": "fully offline",
+        "mode": "not enforced",
         # No outbound hook is installed yet, so this is not enforcement — say so.
         "enforced": False,
         "llm": {
@@ -191,5 +191,5 @@ def offline_status() -> dict:
             "host_allowlisted": health.get("host_allowlisted"),
             "mode": health.get("mode"),
         },
-        "db": {"host": MONGO_URI},
+        "db": {"host": MONGO_ADDRESS, "host_is_loopback": True},
     }

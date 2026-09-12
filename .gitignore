@@ -26,4 +26,5 @@ mongo-data/
 .idea/
 .vscode/
 
-# generated artifact — rebuild with: python demo/pitch/build_pptx.py
+# Generated pitch previews and build cache
+/.cache/

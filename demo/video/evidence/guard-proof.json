@@ -1,0 +1,18 @@
+{
+  "scope": "component-specific default host guards, not global egress enforcement",
+  "results": [
+    {
+      "component": "model",
+      "outcome": "refused_before_transport",
+      "detail": "refusing non-local OLLAMA_HOST 'https://example.invalid:11434' \u2014 this project runs entirely on-premises; unset OLLAMA_HOST, point it at localhost:11434, or if the model really is on another box you control set OLLAMA_ALLOW_HOST=example.invalid"
+    },
+    {
+      "component": "gateway",
+      "outcome": "refused_before_transport",
+      "detail": "refusing non-local OPENCLAW_HOST 'https://example.invalid:18789' \u2014 this project runs entirely on localhost"
+    }
+  ],
+  "transport_attempts": 0,
+  "database_uri_guard": "missing from checkout",
+  "global_http_guard": "missing from checkout"
+}

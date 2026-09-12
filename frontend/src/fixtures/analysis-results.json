@@ -1,0 +1,99 @@
+{
+  "evt_001": {
+    "event": {
+      "id": "evt_001",
+      "type": "weather",
+      "description": "Port closure, Gulf Coast, 48hrs — inbound alloy shipments held",
+      "affected_location": "Gulf Coast, LA",
+      "severity": "high",
+      "timestamp": "2026-09-12T14:05:00Z"
+    },
+    "directly_affected": [
+      "sup_001"
+    ],
+    "cascading_affected": [
+      "sup_002",
+      "sup_003",
+      "sup_004"
+    ],
+    "risk_summary": "A high-severity weather event (“Port closure, Gulf Coast, 48hrs — inbound alloy shipments held”) has disrupted Gulf Precision Castings (Turbine housing, cast alloy), a single-source supplier with no qualified alternate. The disruption propagates to 3 downstream suppliers: Delta Assembly Works (Turbocharger subassembly), Northline Coatings (Thermal barrier coating), Cascade Final Assembly (Finished powertrain module). Principal concerns are 2 single-source dependencies in the affected path and 1 supplier already flagged on compliance.",
+    "draft_report": "To: Compliance Contact\nSubject: Supply disruption — Port closure, Gulf Coast, 48hrs — action required\n\nA high-severity weather event has been detected affecting Gulf Coast, LA.\n\nDirectly affected:\n  - Gulf Precision Castings (Turbine housing, cast alloy)\n\nDownstream exposure:\n  - Delta Assembly Works (Turbocharger subassembly)\n  - Northline Coatings (Thermal barrier coating)\n  - Cascade Final Assembly (Finished powertrain module)\n\nRecommended next steps:\n  1. Confirm on-hand inventory and committed orders for each part listed above.\n  2. Begin qualification review for an alternate source where the affected supplier is single-source.\n  3. Review the compliance status of the flagged suppliers before the next filing window.\n  4. Re-assess once the disruption window closes.\n\nThis draft was prepared automatically for human review and has not been sent."
+  },
+  "evt_002": {
+    "event": {
+      "id": "evt_002",
+      "type": "compliance",
+      "description": "Supplier audit finding: incomplete conflict-minerals filing",
+      "affected_location": "Memphis, TN",
+      "severity": "medium",
+      "timestamp": "2026-09-11T09:30:00Z"
+    },
+    "directly_affected": [
+      "sup_002"
+    ],
+    "cascading_affected": [
+      "sup_004"
+    ],
+    "risk_summary": "A medium-severity compliance event (“Supplier audit finding: incomplete conflict-minerals filing”) has disrupted Delta Assembly Works (Turbocharger subassembly). The disruption propagates to 1 downstream supplier: Cascade Final Assembly (Finished powertrain module). Principal concerns are 1 single-source dependency in the affected path and 1 supplier already flagged on compliance.",
+    "draft_report": "To: Compliance Contact\nSubject: Supply disruption — Supplier audit finding: incomplete conflict-minerals filing — action required\n\nA medium-severity compliance event has been detected affecting Memphis, TN.\n\nDirectly affected:\n  - Delta Assembly Works (Turbocharger subassembly)\n\nDownstream exposure:\n  - Cascade Final Assembly (Finished powertrain module)\n\nRecommended next steps:\n  1. Confirm on-hand inventory and committed orders for each part listed above.\n  2. Begin qualification review for an alternate source where the affected supplier is single-source.\n  3. Review the compliance status of the flagged suppliers before the next filing window.\n  4. Re-assess once the disruption window closes.\n\nThis draft was prepared automatically for human review and has not been sent."
+  },
+  "evt_003": {
+    "event": {
+      "id": "evt_003",
+      "type": "financial",
+      "description": "Credit downgrade — supplier placed on negative watch after missed covenant",
+      "affected_location": "Greensboro, NC",
+      "severity": "medium",
+      "timestamp": "2026-09-10T16:45:00Z"
+    },
+    "directly_affected": [
+      "sup_010"
+    ],
+    "cascading_affected": [
+      "sup_004"
+    ],
+    "risk_summary": "A medium-severity financial event (“Credit downgrade — supplier placed on negative watch after missed covenant”) has disrupted Piedmont Circuit Labs (ECU control board). The disruption propagates to 1 downstream supplier: Cascade Final Assembly (Finished powertrain module). Principal concerns are 1 single-source dependency in the affected path and 1 supplier already flagged on compliance.",
+    "draft_report": "To: Compliance Contact\nSubject: Supply disruption — Credit downgrade — action required\n\nA medium-severity financial event has been detected affecting Greensboro, NC.\n\nDirectly affected:\n  - Piedmont Circuit Labs (ECU control board)\n\nDownstream exposure:\n  - Cascade Final Assembly (Finished powertrain module)\n\nRecommended next steps:\n  1. Confirm on-hand inventory and committed orders for each part listed above.\n  2. Begin qualification review for an alternate source where the affected supplier is single-source.\n  3. Review the compliance status of the flagged suppliers before the next filing window.\n  4. Re-assess once the disruption window closes.\n\nThis draft was prepared automatically for human review and has not been sent."
+  },
+  "evt_004": {
+    "event": {
+      "id": "evt_004",
+      "type": "geopolitical",
+      "description": "Export licence suspension on rare-earth concentrate, indefinite",
+      "affected_location": "Antofagasta, CL",
+      "severity": "high",
+      "timestamp": "2026-09-09T07:15:00Z"
+    },
+    "directly_affected": [
+      "sup_007"
+    ],
+    "cascading_affected": [
+      "sup_005",
+      "sup_008",
+      "sup_002",
+      "sup_006",
+      "sup_004"
+    ],
+    "risk_summary": "A high-severity geopolitical event (“Export licence suspension on rare-earth concentrate, indefinite”) has disrupted Altiplano Rare Earth (Neodymium magnet billet), a single-source supplier with no qualified alternate. The disruption propagates to 5 downstream suppliers: Shenzhen Micro Sensors (Manifold pressure sensor array), Great Lakes Stamping (Stamped steel mounting bracket), Delta Assembly Works (Turbocharger subassembly), and 2 more. Principal concerns are 3 single-source dependencies in the affected path and 3 suppliers already flagged on compliance.",
+    "draft_report": "To: Compliance Contact\nSubject: Supply disruption — Export licence suspension on rare-earth concentrate, indefinite — action required\n\nA high-severity geopolitical event has been detected affecting Antofagasta, CL.\n\nDirectly affected:\n  - Altiplano Rare Earth (Neodymium magnet billet)\n\nDownstream exposure:\n  - Shenzhen Micro Sensors (Manifold pressure sensor array)\n  - Great Lakes Stamping (Stamped steel mounting bracket)\n  - Delta Assembly Works (Turbocharger subassembly)\n  - Ardennes Wiring Systems (Engine bay wiring harness)\n  - Cascade Final Assembly (Finished powertrain module)\n\nRecommended next steps:\n  1. Confirm on-hand inventory and committed orders for each part listed above.\n  2. Begin qualification review for an alternate source where the affected supplier is single-source.\n  3. Review the compliance status of the flagged suppliers before the next filing window.\n  4. Re-assess once the disruption window closes.\n\nThis draft was prepared automatically for human review and has not been sent."
+  },
+  "evt_005": {
+    "event": {
+      "id": "evt_005",
+      "type": "weather",
+      "description": "Typhoon landfall halts outbound freight, 72hrs",
+      "affected_location": "Nagoya, JP",
+      "severity": "high",
+      "timestamp": "2026-09-08T22:00:00Z"
+    },
+    "directly_affected": [
+      "sup_009"
+    ],
+    "cascading_affected": [
+      "sup_002",
+      "sup_004"
+    ],
+    "risk_summary": "A high-severity weather event (“Typhoon landfall halts outbound freight, 72hrs”) has disrupted Kanto Precision Bearings (High-speed bearing set), a single-source supplier with no qualified alternate. The disruption propagates to 2 downstream suppliers: Delta Assembly Works (Turbocharger subassembly), Cascade Final Assembly (Finished powertrain module). Principal concerns are 2 single-source dependencies in the affected path and 1 supplier already flagged on compliance.",
+    "draft_report": "To: Compliance Contact\nSubject: Supply disruption — Typhoon landfall halts outbound freight, 72hrs — action required\n\nA high-severity weather event has been detected affecting Nagoya, JP.\n\nDirectly affected:\n  - Kanto Precision Bearings (High-speed bearing set)\n\nDownstream exposure:\n  - Delta Assembly Works (Turbocharger subassembly)\n  - Cascade Final Assembly (Finished powertrain module)\n\nRecommended next steps:\n  1. Confirm on-hand inventory and committed orders for each part listed above.\n  2. Begin qualification review for an alternate source where the affected supplier is single-source.\n  3. Review the compliance status of the flagged suppliers before the next filing window.\n  4. Re-assess once the disruption window closes.\n\nThis draft was prepared automatically for human review and has not been sent."
+  }
+}

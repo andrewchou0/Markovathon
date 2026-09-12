@@ -80,7 +80,7 @@ def location_matches(supplier_location: Any, event_location: Any) -> str | None:
         return None
     if sup == evt:
         return "exact"
-    if sup in evt or evt in sup:
+    if re.search(rf"\b{re.escape(sup)}\b", evt) or re.search(rf"\b{re.escape(evt)}\b", sup):
         return "substring"
     for a, b in ((sup, evt), (evt, sup)):
         for seg in _segments(a):
@@ -143,7 +143,8 @@ def _raw_exposure(supplier: dict, severity: str, depth: int) -> float:
     if supplier.get("single_source") is True:
         exposure *= SINGLE_SOURCE_MULTIPLIER
 
-    exposure *= COMPLIANCE_MULTIPLIER.get(supplier.get("compliance_status"), 1.0)
+    compliance = supplier.get("compliance_status")
+    exposure *= COMPLIANCE_MULTIPLIER.get(compliance, 1.0) if isinstance(compliance, str) else 1.0
 
     financial = supplier.get("financial_risk_score")
     if isinstance(financial, (int, float)) and not isinstance(financial, bool):
@@ -193,7 +194,7 @@ def get_affected_suppliers(event: Any, suppliers: Any) -> dict:
     event = event if isinstance(event, dict) else {}
     by_id = index_suppliers(suppliers)
     severity = event.get("severity")
-    if severity not in SEVERITY_WEIGHT:
+    if not isinstance(severity, str) or severity not in SEVERITY_WEIGHT:
         severity = "medium"
 
     # --- hop 0: direct location hits, in fixture order for stable output ----

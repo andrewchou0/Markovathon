@@ -11,9 +11,10 @@ Prints what it wrote and exits non-zero on failure.
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
-from backend.data.db import MONGO_DB, MONGO_URI, get_db, ping
+from backend.data.db import MONGO_ADDRESS, MONGO_DB, get_db, ping
 
 SEED_DIR = Path(__file__).parent / "seed"
 CONTRACTS_DIR = Path(__file__).resolve().parents[2] / "contracts"
@@ -32,28 +33,41 @@ def _load_and_validate(seed_file: str, schema_file: str) -> list[dict]:
 
     try:
         import jsonschema
-    except ImportError:
-        print(f"  ! jsonschema not installed — skipping validation of {seed_file}")
-        return docs
+    except ImportError as exc:
+        raise RuntimeError("Install requirements.txt before seeding; schema validation is required") from exc
 
     schema = json.loads((CONTRACTS_DIR / schema_file).read_text())
+    checker = jsonschema.FormatChecker()
+    # jsonschema's RFC 3339 checker is an optional extra, absent from the pinned
+    # requirements. Register an explicit check rather than silently skipping it.
+    @checker.checks("date-time", raises=ValueError)
+    def valid_datetime(value):
+        return isinstance(value, str) and "t" in value.lower() and datetime.fromisoformat(
+            value.replace("Z", "+00:00").replace("z", "+00:00")
+        ).tzinfo is not None
     for doc in docs:
         try:
-            jsonschema.validate(doc, schema)
+            jsonschema.validate(doc, schema, format_checker=checker)
         except jsonschema.ValidationError as exc:
             raise ValueError(
-                f"{seed_file}: {doc.get('id', '<no id>')} fails {schema_file}: {exc.message}"
+                f"{seed_file}: {doc.get('id', '<no id>') if isinstance(doc, dict) else '<not an object>'} fails {schema_file}: {exc.message}"
             ) from exc
+    ids = [doc["id"] for doc in docs]
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"{seed_file} contains duplicate document ids")
     return docs
 
 
 def seed() -> None:
+    # Validate every collection before any write, so a bad events file cannot
+    # leave suppliers partly refreshed from a different scenario.
+    validated = {collection: _load_and_validate(*files) for collection, files in COLLECTIONS.items()}
     ping()
     db = get_db()
-    print(f"seeding {MONGO_URI} db={MONGO_DB}")
+    print(f"seeding {MONGO_ADDRESS} db={MONGO_DB}")
 
     for collection, (seed_file, schema_file) in COLLECTIONS.items():
-        docs = _load_and_validate(seed_file, schema_file)
+        docs = validated[collection]
         for doc in docs:
             # _id = the document's own domain id string, so re-running upserts
             # in place instead of duplicating rows.

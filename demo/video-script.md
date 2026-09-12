@@ -58,8 +58,10 @@ does it work and where does the data come from" inside a 2-minute budget.**
 
 **Film in live mode: `http://127.0.0.1:5173/?demo=0`.** That reads the real database, so
 all 10 suppliers and all 5 events are available and `evt_004` gives a genuine three-tier
-reveal. Demo mode (`?demo=1`) is a separate scripted walkthrough with its own 4-supplier
-sample set — good, but it only covers `evt_001`/`evt_002` and cannot show the deep cascade.
+reveal. Demo mode (`?demo=1`) is a separate scripted walkthrough of saved Python results from
+the same 10 suppliers, 5 single-source suppliers, and all 5 seeded events. It defaults
+to `evt_004` and shows the same three-tier cascade with a saved 0.961 risk score.
+Use live mode to film actual service activity; label demo playback as saved results.
 
 **Do not film with `mock_openclaw.py` running.** Its canned prose is event-agnostic, so
 the assessment will describe a Gulf Coast port closure while the screen shows a Chilean
@@ -131,7 +133,7 @@ a title.
 | --- | --- |
 | **On screen** | Scroll up to the Live workspace. The **Pipeline** panel on the right is the built-in version of the rail — `MongoDB` already ticked. At 0:22, a 2s terminal inset (bottom-right) shows `curl -s localhost:8000/api/suppliers \| jq '.[0]'` returning the same data. |
 | **Caption** | `10 suppliers · live from local MongoDB · no cloud, no API keys` |
-| **Narration (39w)** | "Ten suppliers, live from a local MongoDB. Parts, compliance status, and who depends on whom. Four are single-source: if one stops, there's no alternate. No cloud, no API keys — supplier data like this usually can't legally leave the building." |
+| **Narration (39w)** | "Ten suppliers, live from a local MongoDB. Parts, compliance status, and who depends on whom. Five are single-source: if one stops, there's no alternate. No cloud, no API keys — supplier data like this usually can't legally leave the building." |
 
 **Direction.** That 2-second terminal inset is doing real work: it proves the board is
 reading a database rather than a hardcoded array. Don't skip it and don't narrate it.
@@ -187,16 +189,18 @@ autonomy claim, and a staged inbox is the one thing that would cost you credibil
 
 ---
 
-### Beat 6 · What it's worth — 1:38–2:00 (22s)
+### Beat 6 · Keep production moving — 1:38–2:00 (22s)
 
 | | |
 | --- | --- |
-| **On screen** | Pull back to the full board, cascade path still lit, gauge at 0.961, **External calls blocked: 0** badge zoomed slightly. Rail fully lit, end to end. Hold the final frame 1.5s after the last word. |
-| **Caption** | `3 tiers of visibility · 0.57s with the model down · 143 + 77 automated checks` |
-| **Narration (59w)** | "So: an agent that watches your supplier network on your own hardware, finds the exposure three tiers down that nobody sees today, and puts a drafted response in front of the person who can approve it — before it's a line-down event. For regulated manufacturing, running locally isn't a feature. It's the only way they can run this at all." |
+| **On screen** | Retain the current Markov design and briefly reestablish the dependency chain. Combine **Stock + Schedule + Orders + Quality**. At 1:44.7, show the proposed response: reserve 40 finished modules plus 140 released sensors for the priority order; build 20 standard modules, park the remaining 160, then change over for 2h and build 160 independent kits. The 40-hour worked example shows **$25,600 → $4,600 modeled late fees + setup**, **+16 productive hours**, **180 priority modules on time**, and **160 standard modules still late**. End on human review and reassessment. The closing rail shows Operational context → Impact analysis → Response planning → Human approval → Reassessment. |
+| **Caption** | `40-hour worked example` · `Modeled late fees + setup` · `160 standard modules still late` |
+| **Narration (38w)** | "Knowing the cause is only the start. Combine stock, schedules, orders, and quality records. Protect the priority order, then switch to independent kits. The shortage remains, but production keeps moving. Review the plan and reassess as conditions change." |
 
-**Direction.** That last sentence is the pitch. Land it clean, then stop talking and let
-the final frame breathe. Don't add "thanks for watching".
+**Direction.** The first 1:38 of the editable video is unchanged. Keep the existing
+voice, music level, logo, and transitions. Let the voice finish at 1:55.30 and hold
+the result through 2:00. The operating response mitigates the consequences while the
+supply restriction remains; do not imply that a schedule change repairs the root cause.
 
 ---
 

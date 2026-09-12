@@ -7,7 +7,10 @@
     "compliance_status": "compliant",
     "location": "Gulf Coast, LA",
     "financial_risk_score": 0.22,
-    "downstream_dependents": ["sup_002", "sup_003"]
+    "downstream_dependents": [
+      "sup_002",
+      "sup_003"
+    ]
   },
   {
     "id": "sup_002",
@@ -17,7 +20,9 @@
     "compliance_status": "at_risk",
     "location": "Memphis, TN",
     "financial_risk_score": 0.61,
-    "downstream_dependents": ["sup_004"]
+    "downstream_dependents": [
+      "sup_004"
+    ]
   },
   {
     "id": "sup_003",
@@ -38,5 +43,80 @@
     "location": "Tacoma, WA",
     "financial_risk_score": 0.3,
     "downstream_dependents": []
+  },
+  {
+    "id": "sup_005",
+    "name": "Shenzhen Micro Sensors",
+    "part_supplied": "Manifold pressure sensor array",
+    "single_source": true,
+    "compliance_status": "at_risk",
+    "location": "Shenzhen, CN",
+    "financial_risk_score": 0.48,
+    "downstream_dependents": [
+      "sup_002",
+      "sup_006"
+    ]
+  },
+  {
+    "id": "sup_006",
+    "name": "Ardennes Wiring Systems",
+    "part_supplied": "Engine bay wiring harness",
+    "single_source": false,
+    "compliance_status": "compliant",
+    "location": "Liege, BE",
+    "financial_risk_score": 0.19,
+    "downstream_dependents": [
+      "sup_004"
+    ]
+  },
+  {
+    "id": "sup_007",
+    "name": "Altiplano Rare Earth",
+    "part_supplied": "Neodymium magnet billet",
+    "single_source": true,
+    "compliance_status": "non_compliant",
+    "location": "Antofagasta, CL",
+    "financial_risk_score": 0.77,
+    "downstream_dependents": [
+      "sup_005",
+      "sup_008"
+    ]
+  },
+  {
+    "id": "sup_008",
+    "name": "Great Lakes Stamping",
+    "part_supplied": "Stamped steel mounting bracket",
+    "single_source": false,
+    "compliance_status": "compliant",
+    "location": "Erie, PA",
+    "financial_risk_score": 0.25,
+    "downstream_dependents": [
+      "sup_002"
+    ]
+  },
+  {
+    "id": "sup_009",
+    "name": "Kanto Precision Bearings",
+    "part_supplied": "High-speed bearing set",
+    "single_source": true,
+    "compliance_status": "compliant",
+    "location": "Nagoya, JP",
+    "financial_risk_score": 0.33,
+    "downstream_dependents": [
+      "sup_002",
+      "sup_004"
+    ]
+  },
+  {
+    "id": "sup_010",
+    "name": "Piedmont Circuit Labs",
+    "part_supplied": "ECU control board",
+    "single_source": false,
+    "compliance_status": "non_compliant",
+    "location": "Greensboro, NC",
+    "financial_risk_score": 0.68,
+    "downstream_dependents": [
+      "sup_004"
+    ]
   }
 ]

@@ -41,6 +41,11 @@ import time
 from typing import Any
 from urllib.parse import urlparse
 
+try:
+    from backend.agent.transport import urlopen
+except ImportError:  # supports running this module directly
+    from transport import urlopen
+
 # --- configuration ----------------------------------------------------------
 # 18789 is the documented gateway default. HTTP and WebSocket share this port.
 OPENCLAW_HOST = os.getenv("OPENCLAW_HOST", "http://127.0.0.1:18789")
@@ -117,7 +122,10 @@ ALLOW_HOST = os.getenv("OPENCLAW_ALLOW_HOST", "").strip().lower()
 
 def _hostname(url: str) -> str:
     try:
-        return (urlparse(url).hostname or "").lower()
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"}:
+            return ""
+        return (parsed.hostname or "").lower()
     except BaseException:  # noqa: BLE001
         return ""
 
@@ -162,7 +170,7 @@ def _post(path: str, payload: dict, extra_headers: dict[str, str] | None = None)
 
     if _TRANSPORT == "httpx":
         timeout = httpx.Timeout(READ_TIMEOUT_S, connect=CONNECT_TIMEOUT_S)
-        response = httpx.post(url, content=body, headers=headers, timeout=timeout)
+        response = httpx.post(url, content=body, headers=headers, timeout=timeout, trust_env=False, follow_redirects=False)
         try:
             return response.status_code, response.json()
         except ValueError:
@@ -173,7 +181,7 @@ def _post(path: str, payload: dict, extra_headers: dict[str, str] | None = None)
 
     request = urllib.request.Request(url, data=body, headers=headers)
     try:
-        with urllib.request.urlopen(request, timeout=READ_TIMEOUT_S) as response:  # noqa: S310
+        with urlopen(request, timeout=READ_TIMEOUT_S) as response:
             return response.status, json.loads(response.read().decode("utf-8") or "{}")
     except urllib.error.HTTPError as exc:
         # A 4xx is a real answer from the gateway, not a transport failure — the
@@ -251,9 +259,12 @@ def build_approval_request(analysis_result: dict, risk: dict | None = None) -> d
     analysis_result = analysis_result if isinstance(analysis_result, dict) else {}
     risk = risk if isinstance(risk, dict) else {}
 
-    event = analysis_result.get("event") or {}
-    direct = analysis_result.get("directly_affected") or []
-    cascade = analysis_result.get("cascading_affected") or []
+    event = analysis_result.get("event")
+    event = event if isinstance(event, dict) else {}
+    def ids(value):
+        return [item for item in value if isinstance(item, str)] if isinstance(value, (list, tuple)) else []
+    direct = ids(analysis_result.get("directly_affected"))
+    cascade = ids(analysis_result.get("cascading_affected"))
     severity = str(event.get("severity", "unknown")).upper()
 
     headline = f"Supply disruption — {severity} — approval required"
@@ -269,9 +280,9 @@ def build_approval_request(analysis_result: dict, risk: dict | None = None) -> d
     if risk.get("network_risk_score") is not None:
         lines.append(f"Network risk score: {risk['network_risk_score']}")
     if risk.get("single_source_exposed"):
-        lines.append(f"Single-source exposure: {', '.join(risk['single_source_exposed'])}")
-    if risk.get("cascade_by_hop"):
-        hops = ", ".join(f"hop {h}: {len(ids)}" for h, ids in sorted(risk["cascade_by_hop"].items()))
+        lines.append(f"Single-source exposure: {', '.join(ids(risk['single_source_exposed']))}")
+    if isinstance(risk.get("cascade_by_hop"), dict):
+        hops = ", ".join(f"hop {h}: {len(ids(values))}" for h, values in risk["cascade_by_hop"].items())
         lines.append(f"Cascade depth: {hops}")
 
     lines += [
@@ -282,8 +293,8 @@ def build_approval_request(analysis_result: dict, risk: dict | None = None) -> d
         "--- draft report, for your approval ---",
         str(analysis_result.get("draft_report", "")).strip(),
         "",
-        "Reply APPROVE to send this report, or REJECT to discard it. "
-        "Nothing has been sent.",
+        "Please review and record APPROVE or REJECT through your team's approval process. "
+        "Reply handling and automatic sending are not connected. Nothing has been sent to suppliers.",
     ]
 
     return {
@@ -334,7 +345,8 @@ def request_approval(analysis_result: dict, risk: dict | None = None, channel: s
             last_detail = f"{type(exc).__name__}: {exc}"[:160]
             break  # transport is down; trying more names won't help
 
-        if status == 200 and body.get("ok"):
+        body = body if isinstance(body, dict) else {}
+        if status == 200 and body.get("ok") is True:
             _discovered_tool = tool
             STATS["message_tool"] = tool
             STATS["approvals_sent"] += 1
@@ -345,7 +357,8 @@ def request_approval(analysis_result: dict, risk: dict | None = None, channel: s
             last_detail = f"tool {tool!r} not available on this gateway"
             continue  # genuinely the wrong name — try the next candidate
 
-        error = (body.get("error") or {}) if isinstance(body, dict) else {}
+        error = body.get("error")
+        error = error if isinstance(error, dict) else {}
         last_detail = f"HTTP {status}: {error.get('message') or error.get('type') or 'rejected'}"[:160]
         if status in (401, 403):
             break  # auth or policy, not a naming problem
